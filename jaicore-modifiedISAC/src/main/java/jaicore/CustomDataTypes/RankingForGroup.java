@@ -1,20 +1,24 @@
 package jaicore.CustomDataTypes;
 
-import java.util.List;
+import java.util.ArrayList;
 
-public class RankingForGroup <C,S>{
-	private Center<C> centerofGroup;
-	private List<Solution<S>> rankinforGroup;
+/**
+ * RankingForGroup.java - saves a solution ranking for a group identified by thier group
+ * 
+ * @author Helen Beierling
+ *
+ * @param <C> The identifier of the group
+ * @param <S> The solutions that are ranked best for a group of probleminstances
+ */
+public class RankingForGroup<C,S> extends Ranking<S>{
+	private GroupIdentifier<C> identifierOfGroup;
 	
-	RankingForGroup(Center<C> center, List<Solution<S>> solutionsForGroup){
-		this.centerofGroup=center;
-		this.rankinforGroup=solutionsForGroup;
+	RankingForGroup(GroupIdentifier<C> identifier, ArrayList<Solution<S>> solutionsForGroup){
+		super(solutionsForGroup);
+		this.identifierOfGroup=identifier;	
 	}
 	
-	Center<C> getCenterofGroup(){
-		return centerofGroup;
-	}
-	List<Solution<S>> getRankingofGroup(){
-		return rankinforGroup;
+	GroupIdentifier<C> getIdentifierForGroup(){
+		return identifierOfGroup;
 	}
 }

@@ -1,9 +1,10 @@
 package jaicore.CandidateProvider;
 
 import java.util.List;
-import jaicore.CustomDataTypes.Instance;
-import jaicore.CustomDataTypes.Solution;
+
+import jaicore.CustomDataTypes.ProblemInstance;
+import jaicore.CustomDataTypes.Ranking;
 
 public interface IRankedSolutionCandidateProvider<I,S> {
-	List<Solution<S>>getCandidate(Instance<I> instance);
+	Ranking<S> getCandidate(ProblemInstance<I> instance);
 }

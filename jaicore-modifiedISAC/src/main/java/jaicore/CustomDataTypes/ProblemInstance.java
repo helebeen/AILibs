@@ -1,6 +1,6 @@
 package jaicore.CustomDataTypes;
 
-public class Instance<I> {
+public class ProblemInstance<I> {
 	/**
 	 * @author Helen Beierling
 	 *
@@ -8,8 +8,8 @@ public class Instance<I> {
 	 */
 		private I instance;
 		
-		public Instance() {}
-		public Instance(I inst) {
+		public ProblemInstance() {}
+		public ProblemInstance(I inst) {
 			this.instance = inst;
 		}
 		

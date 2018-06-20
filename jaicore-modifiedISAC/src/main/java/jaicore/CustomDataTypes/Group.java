@@ -2,26 +2,37 @@ package jaicore.CustomDataTypes;
 
 import java.util.List;
 
+/**
+ * Group.java - Stores a group with it center as ID and the associated instances
+ * 
+ * @author Helen Bierling
+ *
+ * @param <C> The identifier of the group
+ * @param <I> The instances in the group
+ */
 public class Group <C,I>{
-	private List<Instance<I>> instances;
-	private Center<C> center;
+	private List<ProblemInstance<I>> problemInstances;
+	private GroupIdentifier<C> groupIdentifier;
 	
-	Group(List<Instance<I>> instanlist,Center<C> cent){
-		this.instances = instanlist;
-		this.center = cent;
+	Group(List<ProblemInstance<I>> instanlist,GroupIdentifier<C> id){
+		this.problemInstances = instanlist;
+		this.groupIdentifier = id;
 	}
 	
-	List<Instance<I>> getInstances(){
-		return instances;
+	List<ProblemInstance<I>> getInstances(){
+		return problemInstances;
 	}
-	Center<C> getCenter(){
-		return center;
+	GroupIdentifier<C> getIdentifier(){
+		return groupIdentifier;
 	}
-	void setTripleList(List<Instance<I>> newInstances){
-		this.instances = newInstances;
+	void setInstances(List<ProblemInstance<I>> newInstances){
+		this.problemInstances = newInstances;
 	}
-	void setCenter(Center<C> newCenter){
-		this.center = newCenter;
+	void setGroupIdentifier(GroupIdentifier<C> newIdentifer){
+		this.groupIdentifier = newIdentifer;
 	}
+	 void addInstance(ProblemInstance<I> newInstance){
+		 problemInstances.add(newInstance);
+	 }
 	
 }
