@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class Table<I,S,P> {
 	HashMap<ProblemInstance<I>,ArrayList<Tuple<S,P>>> InformationForRanking;
 	
-	Table(){
+	public Table(){
 		this.InformationForRanking = new HashMap<ProblemInstance<I>,ArrayList<Tuple<S,P>>>();
 	}
 

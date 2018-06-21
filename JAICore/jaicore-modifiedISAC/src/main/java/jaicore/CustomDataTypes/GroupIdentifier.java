@@ -9,7 +9,7 @@ public class GroupIdentifier<C> {
 	
 	private C identifier;
 	
-	GroupIdentifier(C id){
+	public GroupIdentifier(C id){
 		this.identifier = id;
 	}
 	C getCenter(){

@@ -14,11 +14,11 @@ import jaicore.Ranker.Ranker;
  * for groups of them
  * @param <P> The performances of the solution for a given Problem instance.
  */
-abstract class GroupBasedRanker<C,I,S,P> implements Ranker<S>{
+abstract public class GroupBasedRanker<C,I,S,P> implements Ranker<S>{
 	IInstanceCollector<I> instancecollection;
 	ITableGeneratorandCompleter<I,S,P> informationForRankingOfInstances;
 	
-	GroupBasedRanker(IInstanceCollector<I> instcoll,ITableGeneratorandCompleter<I,S,P> table){
+	public GroupBasedRanker(IInstanceCollector<I> instcoll,ITableGeneratorandCompleter<I,S,P> table){
 		this.instancecollection = instcoll;
 		this.informationForRankingOfInstances = table;
 	}

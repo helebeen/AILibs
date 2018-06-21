@@ -14,7 +14,7 @@ public class Group <C,I>{
 	private List<ProblemInstance<I>> problemInstances;
 	private GroupIdentifier<C> groupIdentifier;
 	
-	Group(List<ProblemInstance<I>> instanlist,GroupIdentifier<C> id){
+	public Group(List<ProblemInstance<I>> instanlist,GroupIdentifier<C> id){
 		this.problemInstances = instanlist;
 		this.groupIdentifier = id;
 	}

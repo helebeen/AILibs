@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class RankingForGroup<C,S> extends Ranking<S>{
 	private GroupIdentifier<C> identifierOfGroup;
 	
-	RankingForGroup(GroupIdentifier<C> identifier, ArrayList<Solution<S>> solutionsForGroup){
+	public RankingForGroup(GroupIdentifier<C> identifier, ArrayList<Solution<S>> solutionsForGroup){
 		super(solutionsForGroup);
 		this.identifierOfGroup=identifier;	
 	}
