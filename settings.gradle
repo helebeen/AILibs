@@ -12,7 +12,7 @@ include ":JAICore:jaicore-logging"
 include ":JAICore:jaicore-logic"
 include ":JAICore:jaicore-ml"
 include ":JAICore:jaicore-order"
-
+include ":JAICore:jaicore-modifiedISAC"
 include ":JAICore:jaicore-planning"
 include ":JAICore:jaicore-processes"
 include ":JAICore:jaicore-search"
