@@ -2,13 +2,15 @@ package jaicore.modifiedISAC;
 
 import java.util.ArrayList;
 
-public abstract class Gmeans<A,D> extends Kmeans<A, D> {
+public abstract class Gmeans<A, B, D> extends Kmeans<A, B, D> {
 
-	public Gmeans(int k, ArrayList<A> toClusterPoints, IDistanceMetric<D, A, A> dist) {
-		super(k, toClusterPoints, dist);
+	public Gmeans(ArrayList<A> toClusterPoints, IDistanceMetric<D, B, B> dist) {
+		super(toClusterPoints, dist);
 		// TODO Auto-generated constructor stub
 	}
-	
-	public abstract Cluster clustergmeans();
+
+	public abstract void initializeGMeans();
+
+	public abstract Cluster gmeanscluster();
 
 }

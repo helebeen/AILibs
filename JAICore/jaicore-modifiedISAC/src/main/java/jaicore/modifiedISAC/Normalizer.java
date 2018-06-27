@@ -2,8 +2,6 @@ package jaicore.modifiedISAC;
 
 import java.util.ArrayList;
 
-import java.math.*;
-
 import jaicore.CustomDataTypes.ProblemInstance;
 import weka.core.Instance;
 
@@ -32,7 +30,7 @@ public class Normalizer {
 
 	public double[] normalize(double[] vectorToNormalize) {
 		for (int i = 0; i < vectorToNormalize.length; i++) {
-			vectorToNormalize[i] = ((vectorToNormalize[i]/maxvalues[i])*2)-1; 
+			vectorToNormalize[i] = ((vectorToNormalize[i] / maxvalues[i]) * 2) - 1;
 		}
 		return vectorToNormalize;
 	}
