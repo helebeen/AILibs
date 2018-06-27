@@ -16,32 +16,32 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	private static final String defaultfilename = "metaData_smallDataSets_computed";
 	String customfilename;
 
-	public ModifiedISACInstanceCollector(String filename) {
+	public ModifiedISACInstanceCollector(String filename) throws Exception {
 		this.customfilename = filename;
-	}
-
-	public ModifiedISACInstanceCollector() {
-
-	}
-
-	@Override
-	public void collectInstnaces() throws Exception {
-		if (customfilename != null) {
-			DataSource customsource = new DataSource(customfilename);
-			Instances customdata = customsource.getDataSet();
-			for (Instance i : customdata) {
-				collectedInstances.add(new ProblemInstance<Instance>(i));
+		DataSource customsource = new DataSource(customfilename);
+		Instances customdata = customsource.getDataSet();
+		for (Instance i : customdata) {
+			for(int j = 0; j< i.numAttributes(); j++) {
+				if(j == 0) {
+					i.deleteAttributeAt(j);
+				}
+				if(j>=) {
+					i.deleteAttributeAt(j);
+				}
 			}
-		} else {
-			InputStream inputStream = Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream(defaultfilename);
-			DataSource source = new DataSource(inputStream);
-			Instances data = source.getDataSet();
-			for (Instance i : data) {
-				collectedInstances.add(new ProblemInstance<Instance>(i));
-			}
+			collectedInstances.add(new ProblemInstance<Instance>(i));
 		}
 	}
+
+	public ModifiedISACInstanceCollector() throws Exception {
+		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultfilename);
+		DataSource source = new DataSource(inputStream);
+		Instances data = source.getDataSet();
+		for (Instance i : data) {
+			collectedInstances.add(new ProblemInstance<Instance>(i));
+		}
+	}
+
 
 	@Override
 	public List<ProblemInstance<Instance>> getProblemInstances() {
