@@ -25,7 +25,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 				if(j == 0) {
 					i.deleteAttributeAt(j);
 				}
-				if(j>=) {
+				if(j>=104) {
 					i.deleteAttributeAt(j);
 				}
 			}
