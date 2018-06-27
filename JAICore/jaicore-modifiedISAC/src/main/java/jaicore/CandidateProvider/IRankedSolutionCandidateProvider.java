@@ -1,7 +1,5 @@
 package jaicore.CandidateProvider;
 
-import java.util.List;
-
 import jaicore.CustomDataTypes.ProblemInstance;
 import jaicore.CustomDataTypes.Ranking;
 
