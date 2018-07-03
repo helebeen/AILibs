@@ -14,7 +14,6 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 
 	private ArrayList<ProblemInstance<Instance>> collectedInstances;
 
-
 	public ModifiedISACInstanceCollector(String filename) throws Exception {
 		DataSource customsource = new DataSource(filename);
 		Instances customdata = customsource.getDataSet();
@@ -28,13 +27,9 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		DataSource source = new DataSource(inputStream);
 		Instances data = source.getDataSet();
 		for (Instance i : data) {
-			for(int j = 0; j< i.numAttributes(); j++) {
-				if(j == 0) {
-					i.deleteAttributeAt(j);
-				}
-				if(j>=104) {
-					i.deleteAttributeAt(j);
-				}
+			i.deleteAttributeAt(0);
+			for (int j = i.numAttributes(); j >= 104 ; j--) {
+				i.deleteAttributeAt(j);
 			}
 			collectedInstances.add(new ProblemInstance<Instance>(i));
 		}

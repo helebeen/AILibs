@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import jaicore.CustomDataTypes.ProblemInstance;
 import weka.core.Instance;
 
-public class GMeansForModifiedISAC extends Gmeans<ProblemInstance<Instance>,double[], Double> {
+public class GMeansForModifiedISAC extends Gmeans<ProblemInstance<Instance>, double[], Double> {
 
 	public GMeansForModifiedISAC(ArrayList<ProblemInstance<Instance>> toClusterPoints,
 			IDistanceMetric<Double, double[], double[]> dist) {
@@ -16,7 +16,7 @@ public class GMeansForModifiedISAC extends Gmeans<ProblemInstance<Instance>,doub
 	@Override
 	public void initializeGMeans() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -34,9 +34,7 @@ public class GMeansForModifiedISAC extends Gmeans<ProblemInstance<Instance>,doub
 	@Override
 	public void initializeKMeans() {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 }

@@ -2,7 +2,6 @@ package jaicore.CustomDataTypes;
 
 import java.util.List;
 
-import weka.core.Instance;
 
 /**
  * Group.java - Stores a group with it center as ID and the associated instances
