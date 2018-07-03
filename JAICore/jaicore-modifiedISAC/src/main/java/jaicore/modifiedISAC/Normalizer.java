@@ -1,23 +1,27 @@
 package jaicore.modifiedISAC;
 
-import java.util.ArrayList;
-
-import java.math.*;
+import java.util.List;
 
 import jaicore.CustomDataTypes.ProblemInstance;
 import weka.core.Instance;
 
 public class Normalizer {
 	private int numbervaluesToNormalize;
-	private double[] maxvalues = new double[numbervaluesToNormalize];
-	private ArrayList<ProblemInstance<Instance>> basisForNormalization;
+	private double[] maxvalues;
+	private List<ProblemInstance<Instance>> basisForNormalization;
 
-	Normalizer(int values, ArrayList<ProblemInstance<Instance>> initalvalues) {
-		this.numbervaluesToNormalize = values;
-		this.basisForNormalization = initalvalues;
-		for (int i = 0; i < numbervaluesToNormalize; i++) {
+	public Normalizer(List<ProblemInstance<Instance>> list) {
+		this.numbervaluesToNormalize = list.size(); 
+		this.maxvalues= new double[numbervaluesToNormalize];
+		this.basisForNormalization = list;
+		for (int i = 0; i < maxvalues.length; i++) {
 			this.maxvalues[i] = 0;
 		}
+		System.out.println(maxvalues.length);
+		for(double d : maxvalues) {
+			System.out.print(d+"||");
+		}
+		System.out.println("test");
 	}
 
 	public void setupnormalize() {
@@ -32,7 +36,7 @@ public class Normalizer {
 
 	public double[] normalize(double[] vectorToNormalize) {
 		for (int i = 0; i < vectorToNormalize.length; i++) {
-			vectorToNormalize[i] = ((vectorToNormalize[i]/maxvalues[i])*2)-1; 
+			vectorToNormalize[i] = ((vectorToNormalize[i] / maxvalues[i]) * 2) - 1;
 		}
 		return vectorToNormalize;
 	}
