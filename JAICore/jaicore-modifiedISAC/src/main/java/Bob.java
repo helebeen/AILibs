@@ -1,6 +1,7 @@
 import jaicore.modifiedISAC.ModifiedISACInstanceCollector;
 import jaicore.modifiedISAC.Normalizer;
 
+
 public class Bob {
 	public static void main(String[] args) {
 		try {
