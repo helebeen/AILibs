@@ -23,17 +23,14 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	}
 
 	public ModifiedISACInstanceCollector() throws Exception {
-		InputStream inputStream = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("metaData_smallDataSets_computed.arff");
+		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("metaData_smallDataSets_computed.arff");
 		DataSource source = new DataSource(inputStream);
 		Instances data = source.getDataSet();
 		data.deleteAttributeAt(0);
-		for (int j = data.numAttributes() - 1; j >= 103; j--) {
-
+		for (int j = data.numAttributes()-1; j >= 103; j--) {
 			data.deleteAttributeAt(j);
 		}
 		System.out.println(data);
-
 		for (Instance i : data) {
 			collectedInstances.add(new ProblemInstance<Instance>(i));
 		}
