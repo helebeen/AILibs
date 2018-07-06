@@ -19,7 +19,7 @@ public class CandidateProviderModifiedISAC implements IRankedSolutionCandidatePr
 		return null;
 	}
 
-	private void formatInstance(Map<Attribute, Double> toFormatInstance) {
+	private void formatInstance(Map<String, Double> toFormatInstance) {
 		for (int i = 0; i< ModifiedISACInstanceCollector.getAtributesofTrainingsdata().size();i++) {
 			consideredInstnace[i]=toFormatInstance.get(ModifiedISACInstanceCollector.getAtributesofTrainingsdata().get(i));
 		}
