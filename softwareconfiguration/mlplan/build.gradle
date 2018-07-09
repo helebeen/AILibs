@@ -15,12 +15,12 @@ sourceSets {
     test {
    	java {
    		srcDir 'test'
+   		srcDir 'examples'
    	}
     }
 }
 
 dependencies {
-	compile name: 'CRCUtils'
 
 	// basic dependencies
 	compile project(':hasco')
@@ -30,7 +30,6 @@ dependencies {
 	compile project(':JAICore:jaicore-graph')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
-	compile project(':JAICore:jaicore-order')
 	compile project(':JAICore:jaicore-ml')
 
 	// Graph Stream
@@ -45,7 +44,7 @@ dependencies {
 
 	// Jackson for JSON (used by JAICore but not contained in the JAR)
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
-	
+
 	// OpenML connector
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.18'
 
@@ -54,6 +53,6 @@ dependencies {
 
 	// wrapped library dependencies
 	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
-	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
+	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.2'
 
 }

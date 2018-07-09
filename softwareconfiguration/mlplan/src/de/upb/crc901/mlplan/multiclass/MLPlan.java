@@ -22,12 +22,12 @@ import org.slf4j.LoggerFactory;
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML;
 import de.upb.crc901.automl.hascowekaml.HASCOForWekaML.HASCOForWekaMLSolution;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.LoggerUtil;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.graph.observation.IObservableGraphAlgorithm;
 import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.ClassifierEvaluator;
 import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
@@ -574,6 +574,7 @@ public class MLPlan extends AbstractClassifier implements Classifier, OptionHand
 	public void enableVisualization() {
 		if (this.timeOfStart >= 0)
 			throw new IllegalStateException("Cannot enable visualization after buildClassifier has been invoked. Please enable it previously.");
+		
 		new SimpleGraphVisualizationWindow<Node<TFDNode, Double>>(this).getPanel()
 		.setTooltipGenerator(new TFDTooltipGenerator<>());
 	}

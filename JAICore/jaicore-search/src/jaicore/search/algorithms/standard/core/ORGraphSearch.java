@@ -26,7 +26,6 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.IIterableAlgorithm;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.LoggerUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.graphvisualizer.events.GraphInitializedEvent;
@@ -34,6 +33,7 @@ import jaicore.graphvisualizer.events.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.NodeReachedEvent;
 import jaicore.graphvisualizer.events.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.NodeTypeSwitchEvent;
+import jaicore.logging.LoggerUtil;
 import jaicore.search.algorithms.interfaces.IObservableORGraphSearch;
 import jaicore.search.structure.core.GraphEventBus;
 import jaicore.search.structure.core.GraphGenerator;
@@ -679,8 +679,7 @@ public class ORGraphSearch<T, A, V extends Comparable<V>>
 	}
 
 	protected synchronized Node<T, V> newNode(Node<T, V> parent, T t2, V evaluation) {
-
-		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n" + expanded.stream().map(n -> n.toString()).collect(Collectors.joining("\n\t"));
+		assert parent == null || expanded.contains(parent.getPoint()) : "Generating successors of an unexpanded node " + parent + ". List of expanded nodes:\n" + expanded.stream().map(n -> "\n\t" + n.toString()).collect(Collectors.joining());
 		assert !open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case!";
 
 		/* create new node and check whether it is a goal */
