@@ -20,20 +20,21 @@ public class Group <C,I>{
 		this.groupIdentifier = id;
 	}
 	
-	List<ProblemInstance<I>> getInstances(){
+	public List<ProblemInstance<I>> getInstances(){
 		return problemInstances;
 	}
-	GroupIdentifier<C> getIdentifier(){
-		return groupIdentifier;
-	}
-	void setInstances(List<ProblemInstance<I>> newInstances){
+	public void setInstances(List<ProblemInstance<I>> newInstances){
 		this.problemInstances = newInstances;
 	}
-	void setGroupIdentifier(GroupIdentifier<C> newIdentifer){
+	public void setGroupIdentifier(GroupIdentifier<C> newIdentifer){
 		this.groupIdentifier = newIdentifer;
 	}
-	 void addInstance(ProblemInstance<I> newInstance){
+	public void addInstance(ProblemInstance<I> newInstance){
 		 problemInstances.add(newInstance);
+	 }
+	 
+	 public GroupIdentifier<C> getId(){
+		 return this.groupIdentifier;
 	 }
 	
 }

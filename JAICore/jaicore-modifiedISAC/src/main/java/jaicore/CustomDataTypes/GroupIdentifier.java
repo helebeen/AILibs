@@ -12,7 +12,7 @@ public class GroupIdentifier<C> {
 	public GroupIdentifier(C id){
 		this.identifier = id;
 	}
-	C getCenter(){
+	public C getIdentifier(){
 		return this.identifier;
 	}
 
