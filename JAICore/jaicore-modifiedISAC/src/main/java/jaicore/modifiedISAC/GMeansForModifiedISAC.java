@@ -1,6 +1,8 @@
 package jaicore.modifiedISAC;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import jaicore.CustomDataTypes.GroupIdentifier;
 import jaicore.CustomDataTypes.ProblemInstance;
@@ -10,6 +12,8 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 	private ArrayList<ProblemInstance<Instance>> instances;
 	private ArrayList<Cluster> kmeansCluster;
 	private ArrayList<Cluster> gmeansCluster;
+	private HashMap<double[], Integer> PositionOfPointInList = new HashMap<double[], Integer>();
+	private HashMap<double[], ArrayList<double[]>> pointsInCenter = new HashMap<double[], ArrayList<double[]>>();
 
 	public GMeansForModifiedISAC(ArrayList<double[]> toClusterPoints, IDistanceMetric<Double, double[], double[]> dist,
 			int k, ArrayList<ProblemInstance<Instance>> instances) {
@@ -36,45 +40,65 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 	@Override
 	public ArrayList<Cluster> kmeanscluster() {
 		// TODO Auto-generated method stub
-		boolean nothingchanged = false;
-		while (!nothingchanged) {
-
+		initializeKMeans();
+		boolean clusteringFinished = false;
+		while(!clusteringFinished) {
+			clusteringFinished = !moveCenterForKmeans();
+			relocatePoints();
 		}
-		return null;
+		return kmeansCluster;
 	}
 
 	@Override
 	public void initializeKMeans() {
 		// TODO Gucken wegen Medain
+		// find first center
 		setupfirstPoint();
+		// setup all other k-1 center
 		for (int i = 1; i < k; i++) {
 			setupfollowingPoints();
 		}
-		for(double[] c : center) {
-			GroupIdentifier<double[]> group = new GroupIdentifier<double[]>(c);
-			kmeansCluster.add(new Cluster(null,group));
+		// put the fist k found cluster into the list of Cluster with the center as
+		// goupidentifer
+		// make a new cluster with the goupidentifer and an empty set of points in
+		// cluster
+		for (int i = 0; i < k; i++) {
+			kmeansCluster.add(new Cluster(null, null));
 		}
-		for(int i = 0; i< points.size();i++){
-			int indexOfMyCenter = 0;
-			double minDist = metric.computeDistance(kmeansCluster.get(0).getId().getIdentifier(),points.get(i));
-			for(int j = 1; j<kmeansCluster.size();j++) {
-				try {
-					double distance = metric.computeDistance(c.getId().getIdentifier(),i);
-					if(distance <= minDist) {
-						indexOfMyCenter = j;
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		for (int i = 0; i < points.size(); i++) {
+			PositionOfPointInList.put(points.get(i), i);
+		}
+		relocatePoints();
+	}
+
+	private boolean moveCenterForKmeans() {
+		boolean hasSomethingChanged = false;
+		for (double[] c : center) {
+			ArrayList<double[]> toConsiderPoints = new ArrayList<double[]>();
+			toConsiderPoints = pointsInCenter.get(c);
+			double[] newCenter = new double[toConsiderPoints.get(0).length];
+			for (double[] point : toConsiderPoints) {
+				for (int i = 0; i < point.length; i++) {
+					newCenter[i] = newCenter[i] + point[i];
 				}
 			}
-			kmeansCluster.get(indexOfMyCenter).addInstance(instances.get(i));
+			for (int i = 0; i < newCenter.length; i++) {
+				newCenter[i] = newCenter[i] / toConsiderPoints.size();
+			}
+			if (!Arrays.equals(c, newCenter)) {
+				hasSomethingChanged = true;
+			}
+			c = newCenter;
 		}
+		return hasSomethingChanged;
 	}
 
 	private void setupfirstPoint() {
 		// TODO Es könnte besser sein den Median zu verwenden weil Manhatten Distance
 		// aber dauert deutlich länger
+		// For every point the distance to every other point is calculated and the
+		// the average is then calculated therefore the in average most distant point
+		// is the first center.
 		double[] firstCenter = new double[points.get(0).length];
 		for (int j = 0; j < points.get(0).length; j++) {
 			int sum = 0;
@@ -91,6 +115,13 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 		double[] maxDistPoint = new double[points.get(0).length];
 		double sumdistance = 0;
 		double max = 0;
+		// goes through the list of all points and for each point computes the distance
+		// to
+		// to all till now found center and sums it up if the point has the most found
+		// distance
+		// so far it is the new maximum distance point in the end the point with the
+		// maximum
+		// distance is found.
 		for (double[] i : points) {
 			sumdistance = 0;
 			for (double[] j : center) {
@@ -107,5 +138,48 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 			}
 		}
 		center.add(maxDistPoint);
+	}
+
+	private void relocatePoints() {
+		for (int i = 0; i < center.size(); i++) {
+			GroupIdentifier<double[]> group = new GroupIdentifier<double[]>(center.get(i));
+			kmeansCluster.get(i).setGroupIdentifier(group);
+		}
+		for (int i = 0; i < center.size(); i++) {
+			if (pointsInCenter.containsKey(center.get(i))) {
+				pointsInCenter.get(center.get(i)).clear();
+			} else {
+				pointsInCenter.put(center.get(i), new ArrayList<double[]>());
+			}
+		}
+		try {
+			// for every point put it in the point set of the cluster it is nearest to in
+			// form of a ProblemInstance.
+			// The points are in the same order as the ProblemInstances because the points
+			// are generated from the Porblem
+			// Instances.
+			// First min dist = dist to fist cluster and gets updated if a other cluster is
+			// nearer.
+			for (int i = 0; i < points.size(); i++) {
+				int indexOfMyCenter = 0;
+				double minDist = metric.computeDistance(kmeansCluster.get(0).getId().getIdentifier(), points.get(i));
+				for (int j = 1; j < kmeansCluster.size(); j++) {
+					double distance = metric.computeDistance(kmeansCluster.get(j).getId().getIdentifier(),
+							points.get(i));
+					if (distance <= minDist) {
+						indexOfMyCenter = j;
+					}
+				}
+				pointsInCenter.get(center.get(indexOfMyCenter)).add(points.get(i));
+				kmeansCluster.get(indexOfMyCenter).addInstance(instances.get(i));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		;
+	}
+	//TODO entferne diese method
+	public HashMap<double[], ArrayList<double[]>> getPointsWithCluster(){
+		return this.pointsInCenter;
 	}
 }
