@@ -8,13 +8,13 @@ abstract public class Kmeans<A,D> {
 	public int k;
 	public IDistanceMetric<D, A, A> metric;
 
-	public Kmeans(ArrayList<A> toClusterPoints, IDistanceMetric<D, A, A> dist, int k) {
+	public Kmeans(ArrayList<A> toClusterPoints, IDistanceMetric<D, A, A> dist) {
 		this.points = toClusterPoints;
 		this.metric = dist;
-		this.k = k;
+		this.center = new ArrayList<A>();
 	}
 
-	public abstract ArrayList<Cluster> kmeanscluster();
+	public abstract ArrayList<Cluster> kmeanscluster(int k);
 
 	public abstract void initializeKMeans();
 }

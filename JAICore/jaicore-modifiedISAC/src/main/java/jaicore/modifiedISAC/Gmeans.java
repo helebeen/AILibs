@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public abstract class Gmeans<A, D> extends Kmeans<A,D> {
 
-	public Gmeans(ArrayList<A> toClusterPoints, IDistanceMetric<D, A, A> dist, int k) {
-		super(toClusterPoints, dist, k);
+	public Gmeans(ArrayList<A> toClusterPoints, IDistanceMetric<D, A, A> dist) {
+		super(toClusterPoints, dist);
 		// TODO Auto-generated constructor stub
 	}
 

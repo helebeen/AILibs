@@ -32,10 +32,10 @@ public class Normalizer {
 					}
 				} else {
 					if (Double.isNaN(maxvalues[j])) {
-						maxvalues[j] = instacnevector[j];
+						maxvalues[j] = Math.abs(instacnevector[j]);
 					} else {
-						if (instacnevector[j] > maxvalues[j]) {
-							maxvalues[j] = instacnevector[j];
+						if (Math.abs(instacnevector[j]) > maxvalues[j]) {
+							maxvalues[j] = Math.abs(instacnevector[j]);
 						}
 					}
 				}
@@ -56,16 +56,31 @@ public class Normalizer {
 					vectorToNormalize[i] = Double.NaN;
 				}
 				else {
-					vectorToNormalize[i]=1;
+					if(vectorToNormalize[i]<0) {
+						vectorToNormalize[i]=-1;
+					}
+					else {
+						vectorToNormalize[i]=1;
+					}
 				}
 			} else {
 				if(Double.isNaN(vectorToNormalize[i])) {
 					vectorToNormalize[i] = Double.NaN;
 				}
-				if(vectorToNormalize[i]>maxvalues[i]) {
-					vectorToNormalize[i]=1;
+				if(Math.abs(vectorToNormalize[i])>maxvalues[i]) {
+					if(vectorToNormalize[i]>=0) {
+						vectorToNormalize[i]=1;
+					}
+					else {
+						vectorToNormalize[i]=-1;
+					}
 				}
-				vectorToNormalize[i] = ((vectorToNormalize[i] / maxvalues[i]) * 2) - 1;
+				if(vectorToNormalize[i]<0) {
+					vectorToNormalize[i] = (((Math.abs(vectorToNormalize[i]) / maxvalues[i]) * 2) - 1)*(-1);
+				}
+				else {
+					vectorToNormalize[i] = ((Math.abs(vectorToNormalize[i]) / maxvalues[i]) * 2) - 1;
+				}
 			}
 		}
 

@@ -1,7 +1,6 @@
 package jaicore.modifiedISAC;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import jaicore.CustomDataTypes.GroupIdentifier;
@@ -19,8 +18,8 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 			int k, ArrayList<ProblemInstance<Instance>> instances) {
 		super(toClusterPoints, dist, k);
 		this.instances = instances;
-		this.kmeansCluster = null;
-		this.gmeansCluster = null;
+		this.kmeansCluster = new ArrayList<Cluster>();
+		this.gmeansCluster = new ArrayList<Cluster>();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -44,8 +43,10 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 		boolean clusteringFinished = false;
 		while(!clusteringFinished) {
 			clusteringFinished = !moveCenterForKmeans();
+			System.out.println(clusteringFinished);
 			relocatePoints();
 		}
+		System.out.println("Fertig");
 		return kmeansCluster;
 	}
 
@@ -63,7 +64,7 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 		// make a new cluster with the goupidentifer and an empty set of points in
 		// cluster
 		for (int i = 0; i < k; i++) {
-			kmeansCluster.add(new Cluster(null, null));
+			kmeansCluster.add(new Cluster(new ArrayList<ProblemInstance<Instance>>(), null));
 		}
 		for (int i = 0; i < points.size(); i++) {
 			PositionOfPointInList.put(points.get(i), i);
@@ -73,22 +74,25 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 
 	private boolean moveCenterForKmeans() {
 		boolean hasSomethingChanged = false;
+		ArrayList<double[]> toConsiderPoints = new ArrayList<double[]>();
 		for (double[] c : center) {
-			ArrayList<double[]> toConsiderPoints = new ArrayList<double[]>();
+			toConsiderPoints.clear();
 			toConsiderPoints = pointsInCenter.get(c);
-			double[] newCenter = new double[toConsiderPoints.get(0).length];
+			double[] newCenter = new double[c.length];
 			for (double[] point : toConsiderPoints) {
 				for (int i = 0; i < point.length; i++) {
+					if(!Double.isNaN(point[i])) {
 					newCenter[i] = newCenter[i] + point[i];
+					}
 				}
 			}
 			for (int i = 0; i < newCenter.length; i++) {
 				newCenter[i] = newCenter[i] / toConsiderPoints.size();
 			}
-			if (!Arrays.equals(c, newCenter)) {
+			if (!compareCenter(c, newCenter)) {
 				hasSomethingChanged = true;
-			}
-			c = newCenter;
+				c = newCenter;
+			}	
 		}
 		return hasSomethingChanged;
 	}
@@ -101,11 +105,13 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 		// is the first center.
 		double[] firstCenter = new double[points.get(0).length];
 		for (int j = 0; j < points.get(0).length; j++) {
-			int sum = 0;
+			double sum = 0;
 			for (int i = 0; i < points.size(); i++) {
-				sum += points.get(i)[j];
+				if(!Double.isNaN(points.get(i)[j])) {
+					sum += points.get(i)[j];
+				}
 			}
-			sum = sum / points.size();
+			sum = sum/points.size();
 			firstCenter[j] = sum;
 		}
 		center.add(firstCenter);
@@ -141,16 +147,11 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 	}
 
 	private void relocatePoints() {
+		pointsInCenter.clear();
 		for (int i = 0; i < center.size(); i++) {
 			GroupIdentifier<double[]> group = new GroupIdentifier<double[]>(center.get(i));
 			kmeansCluster.get(i).setGroupIdentifier(group);
-		}
-		for (int i = 0; i < center.size(); i++) {
-			if (pointsInCenter.containsKey(center.get(i))) {
-				pointsInCenter.get(center.get(i)).clear();
-			} else {
-				pointsInCenter.put(center.get(i), new ArrayList<double[]>());
-			}
+			pointsInCenter.put(center.get(i), new ArrayList<double[]>());
 		}
 		try {
 			// for every point put it in the point set of the cluster it is nearest to in
@@ -164,8 +165,7 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 				int indexOfMyCenter = 0;
 				double minDist = metric.computeDistance(kmeansCluster.get(0).getId().getIdentifier(), points.get(i));
 				for (int j = 1; j < kmeansCluster.size(); j++) {
-					double distance = metric.computeDistance(kmeansCluster.get(j).getId().getIdentifier(),
-							points.get(i));
+					double distance = metric.computeDistance(kmeansCluster.get(j).getId().getIdentifier(),points.get(i));
 					if (distance <= minDist) {
 						indexOfMyCenter = j;
 					}
@@ -181,5 +181,22 @@ public class GMeansForModifiedISAC extends Gmeans<double[], Double> {
 	//TODO entferne diese method
 	public HashMap<double[], ArrayList<double[]>> getPointsWithCluster(){
 		return this.pointsInCenter;
+	}
+	
+	private boolean compareCenter(double[] a,double[] b) {
+		double[] tmpA = new double[a.length];
+		double[] tmpB = new double[b.length];
+		for(int i = 0; i<a.length;i++) {
+			tmpA[i] = Math.rint(a[i]*1000); 
+			tmpB[i] = Math.rint(b[i]*1000);
+		}
+		for(int i = 0; i<a.length;i++) {
+			if(!(Double.isNaN(tmpA[i])|| Double.isNaN(tmpB[i])))
+			{if(!(tmpA[i] == tmpB[i])) {
+				return false;
+			}
+			}
+		}
+		return true;
 	}
 }
