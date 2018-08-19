@@ -4,107 +4,118 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import jaicore.CustomDataTypes.GroupIdentifier;
 import jaicore.CustomDataTypes.ProblemInstance;
 import weka.core.Instance;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class Test extends Gmeans<double[], Double> {
 	private ArrayList<ProblemInstance<Instance>> instances;
-	private ArrayList<Cluster> kmeansCluster;
 	private ArrayList<Cluster> gmeansCluster;
+	private  ArrayList<double[]> intermediateCenter;
+	private HashMap<double[],ArrayList<double[]>> currentPoints;
+	private HashMap<double[],ArrayList<double[]>> intermediatePoints;
+	private ArrayList<double[]> loopPoints;
+	L1DistanceMetric dist = new L1DistanceMetric();
+	
 
-	private HashMap<double[], Integer> PositionOfPointInList = new HashMap<double[], Integer>();
 
-	private HashMap<double[], ArrayList<double[]>> pointsInCenter = new HashMap<double[], ArrayList<double[]>>();
-	private HashMap<double[], double[]> CenterOfPoint = new HashMap<double[], double[]>();
-	private ArrayList<double[]> initpoints = new ArrayList<double[]>();
-
-	public Test(ArrayList<double[]> toClusterPoints, IDistanceMetric<Double, double[], double[]> dist,
+	/**inilizes toClusterPoints with the points that are to Cluster and are normalized metafeatures
+	 * @param toClusterPoints
+	 * @param instances
+	 */
+	public Test(ArrayList<double[]> toClusterPoints,
 			ArrayList<ProblemInstance<Instance>> instances) {
-		super(toClusterPoints, dist);
+		super(toClusterPoints);
 		this.instances = instances;
-		this.kmeansCluster = new ArrayList<Cluster>();
 		this.gmeansCluster = new ArrayList<Cluster>();
-		for (int i = 0; i < toClusterPoints.size(); i++) {
-			PositionOfPointInList.put(toClusterPoints.get(i), i);
-		}
-		initpoints = (ArrayList<double[]>) toClusterPoints.clone();
-	}
-
-	@Override
-	public void initializeGMeans() {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public ArrayList<Cluster> gmeanscluster() {
-		HashMap<double[], ArrayList<double[]>> intermidiateClusterwithPoints = new HashMap<double[], ArrayList<double[]>>();
 		HashMap<Integer, double[]> positionOfCenter = new HashMap<Integer, double[]>();
-		ArrayList<double[]> allPoints = new ArrayList<double[]>();
-
-		for (double[] d : points) {
-			allPoints.add(d);
-		}
-
 		int tmp = 1;
 
 		int k = 1;
 		int i = 1;
-		kmeanscluster(k);
-		
+		// creates a k means clustering instance with all points and an L1 distance metric as metric
+		TestKmeansEinzeln test = new TestKmeansEinzeln(points, dist);
+		//clusters all points with k = 1 
+		currentPoints  = test.kmeanscluster(k);
+		// puts the first center into the list of center
+		for(double[] d : currentPoints.keySet()) {
+			center.add(d);
+		}
+		// saves the position of the center for the excess during the g-means clustering algorithm
 		for (double[] c : center) {
 			positionOfCenter.put(tmp, c);
 			tmp++;
 		}
-		for (double[] c : center) {
-			printDoubleArray(c);
-			intermidiateClusterwithPoints.put(c, new ArrayList<double[]>());
-		}
-		for (double[] point : points) {
-			for(double[] d : intermidiateClusterwithPoints.keySet()) {
-				if(Arrays.equals(CenterOfPoint.get(point),d)) {
-					intermidiateClusterwithPoints.get(d).add(point);
-					CenterOfPoint.put(d, CenterOfPoint.remove(CenterOfPoint.get(point)));
-				}
-			}
-		}
-
+		
 		while (i <= k) {
-			clearKMeans();
-			points = intermidiateClusterwithPoints.get(positionOfCenter.get(i));
-			kmeanscluster(2);
-			double[] v = difference(center.get(0), center.get(1));
+			// looppoints are S_i the points are the points of the considered center C_i 
+			loopPoints = currentPoints.get(positionOfCenter.get(i));
+			System.out.println(loopPoints.size());
+			// makes a new instance with of kmeans with S_i as base
+			TestKmeansEinzeln loopCluster = new TestKmeansEinzeln(loopPoints, dist);
+			//clusters S_I into to cluster intermediate points is a HashMap of center with an ArrayList of thier 
+			//corresponding points
+			intermediatePoints = loopCluster.kmeanscluster(2);
+			//intermediate Center saves the found two Center C`_1 und C`_2 
+			intermediateCenter = loopCluster.getCenter();
+			
+			// the difference between the two new Center
+			double[] v = difference(intermediateCenter.get(0), intermediateCenter.get(1));
+			
 			double w = 0;
+			// w is calculated as the summed squares of the entries of the difference between the center
+			// if the entry is NaN it is ignored in the sum 
 			for (int l = 0; l < v.length; l++) {
 				if(!Double.isNaN(v[l])) {
 					w += Math.pow(v[l], 2);
 				}
 			}
+			
 			double[] y = new double[points.size()];
+			// All points are projected onto a points by multiplying every entry of point with the corresponding 
+			// entry of v and divide by the w. 
+			// For every point the all entrys modified that way are than summed.
+			// if the entry of v is Nan or the entry of the point the entry is ignored 
 			for (int r = 0; r < points.size(); r++) {
 				for (int p = 0; p < points.get(r).length; p++) {
-					y[r] += (v[p] * points.get(r)[p]) / w;
+					if(!Double.isNaN( points.get(r)[p])) {
+						if(!Double.isNaN(v[p])) {
+							y[r] += (v[p] * points.get(r)[p]) / w;
+						}
+						//TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wäre es 
+						// 1 oder nichts machen ? 
+					}
 				}
 			}
+			// if the Anderson Darling test is failed the the center C_i is replaced by C`_1 and S_i is replaced by the 
+			// points of C`_1.
+			// k is raised by 1. 
+			// C_k is replaced by C`_2 and the points of C_k S_k are replaced by the one from C`_2 S`_2 
+			// if the test is passed i is raised.
 			if (!andersonDarlingTest(y)) {
-				intermidiateClusterwithPoints.remove(positionOfCenter.get(i));
-				intermidiateClusterwithPoints.put(center.get(0), pointsInCenter.get(center.get(0)));
-				positionOfCenter.replace(i, center.get(0));
+				currentPoints.remove(positionOfCenter.get(i));
+				currentPoints.put(intermediateCenter.get(0), intermediatePoints.get(intermediateCenter.get(0)));
+				positionOfCenter.replace(i, intermediateCenter.get(0));
 				k++;
-				intermidiateClusterwithPoints.remove(positionOfCenter.get(k));
-				intermidiateClusterwithPoints.put(center.get(1), pointsInCenter.get(center.get(1)));
-				positionOfCenter.replace(k, center.get(1));
-
+				currentPoints.remove(positionOfCenter.get(k));
+				currentPoints.put(intermediateCenter.get(1), intermediatePoints.get(intermediateCenter.get(1)));
+				positionOfCenter.replace(k,intermediateCenter.get(1));
 			} else {
 				i++;
 			}
+			System.out.println("i: "+i+" k: "+k);
 		}
-		for(double[] d : intermidiateClusterwithPoints.keySet()) {
+		
+		System.out.println("Done");
+		for(double[] d : currentPoints.keySet()) {
 			System.out.print("Center: ");
 			printDoubleArray(d);
-			for(double[] j: intermidiateClusterwithPoints.get(d)) {
+			for(double[] j: currentPoints.get(d)) {
 				printDoubleArray(j);
 			}
 		}
@@ -112,53 +123,97 @@ public class Test extends Gmeans<double[], Double> {
 	}
 
 	private boolean andersonDarlingTest(double[] d) {
+		// sorts the Array so that the smallest entrys are the first. Entrys are negative too !!
 		Arrays.sort(d);
-		double mean = 1;
+		
+//		boolean Nanfound = false;
+//		int loopruns = -1;
+//		while(!Nanfound) {
+//			loopruns++;
+//			if(loopruns == d.length||Double.isNaN(d[loopruns])){
+//				Nanfound = true;
+//			}
+//		}
+//			
+//		for(int i = 0; i <(int)Math.floor(loopruns/2); i++) {
+//			double tmp = d[i];
+//			d[i] = d[(loopruns-1)-i];
+//			d[(loopruns-1)-i] = tmp;
+//		}
+		// prints the sorted double arry in the consol
+		printDoubleArray(d);
+		
+		double mean = 0;
 		double variance = 0;
 		
 		int totalvalue = 0;
+		// mean of the sample is estimated by summing all entries and divide by the total number.
+		// Nans are ignored
 		for (double i : d) {
 			if (!Double.isNaN(i)) {
 				totalvalue++;
 				mean += i;
 			}
 		}
-		
 		mean = mean /totalvalue;
 		
+		totalvalue = 0;
+		// variance sigma^2 is estimated by the sum of the squered difference to the mean dvided by sample size -1
 		for (double i : d) {
 			if(!Double.isNaN(i)) {
 				variance += Math.pow((i - mean), 2);
+				totalvalue++;
 			}
 		}
-		
+		variance = variance/(totalvalue-1);
+		// the standardization is made by the entries of d subtracted by the mean and divided by the standard deviation
+		// if the value of d is NaN the entry in the standardization is also NaN
 		double[] y = standraizeRandomVariable(d, mean, variance);
-		double aSquare1 = (-1) * d.length;
-		double aSquare2 = 0;
+		System.out.print("Das sind die standartisierten werte ");
+		printDoubleArray(y);
+		// Are also negative!!
+		// total value is equivalent to y.length
+		// first part of A^2 is -n overall  A^2 = -n-second Part.
+		double aSquare1 = (-1) * y.length;
 		
-		NormalDistribution normal = new NormalDistribution();
+		double aSquare2 = 0;
+		// creates a normal distribution with mean 0 and standard deviation 1
+		NormalDistribution normal = new NormalDistribution(null,0,1);
+		// if y is not Nan than the second part of A^2 is calculated fist the sum. 
+		// There are two possible ways to do it but both do not work.
+		
 		for (int i = 1; i < y.length; i++) {
 			if(!Double.isNaN(y[i])) {
-			aSquare2 = +((2 * i) - 1) * (Math.log(normal.cumulativeProbability(y[i])))
-					+ Math.log(1 - (normal.cumulativeProbability(y[(y.length - i)])));
+//			aSquare2 += ((2 * i) - 1) *
+//					((Math.log(normal.cumulativeProbability(y[i-1])))+ 
+//					Math.log(1 - (normal.cumulativeProbability(y[((y.length) - i)]))));
+				
+			aSquare2 +=((2*i-1)*(Math.log(normal.cumulativeProbability(y[i-1])))+(2*(y.length-i)+1)*(Math.log(1-normal.cumulativeProbability(y[i-1]))));
+		
 			}
 		}
-		aSquare2 = (1 / y.length) * aSquare2;
-		double aSquare = aSquare1 - aSquare2;
-		double aSqurestar = aSquare * (1 + (4 / y.length) - (25 / (Math.pow(y.length, 2))));
+		// A^2 is divided by the the sample size to complete the second part of A^2^*.
+		aSquare2 = aSquare2/y.length;
+		// By substracting part 2 from part 1 A^2^* is completed
+		double aSqurestar = aSquare1 - aSquare2;
+		//double aSqurestar = aSqure * (1 + (4 / y.length) - (25 / (Math.pow(y.length, 2))));
+		System.out.println("A2star = "+ aSqurestar);
+		System.out.println(y.length);
+		// for different sample sizes the threshold weather the distribution is normal or not varies a little.
+		// Overall if A^2^* is greater than the threshold than the test fails
 		if (y.length <= 10) {
-			return aSqurestar > 0.683;
+			return aSqurestar <= 0.683;
 		} else {
 			if (y.length <= 20) {
-				return aSqurestar > 0.704;
+				return aSqurestar <= 0.704;
 			} else {
 				if (y.length <= 50) {
-					return aSqurestar > 0.735;
+					return aSqurestar <= 0.735;
 				} else {
 					if (y.length <= 100) {
-						return aSqurestar > 0.754;
+						return aSqurestar <= 0.754;
 					} else {
-						return aSqurestar > 0.787;
+						return aSqurestar <= 0.787;
 					}
 				}
 			}
@@ -169,7 +224,7 @@ public class Test extends Gmeans<double[], Double> {
 		double[] tmp = new double[d.length];
 		for (int i = 0; i < tmp.length; i++) {
 			if(!Double.isNaN(d[i])) {
-				tmp[i] = (d[i] - mean) / variance;
+				tmp[i] = (d[i] - mean) / (Math.sqrt(variance));
 			}
 			else {
 				tmp[i] = Double.NaN;
@@ -185,223 +240,16 @@ public class Test extends Gmeans<double[], Double> {
 			if(!(Double.isNaN(a[i])||Double.isNaN(b[i]))) {
 				c[i] = a[i] - b[i];
 			}
+			else {
+				c[i] = Double.NaN;
+			}
 		}
 		return c;
-	}
-
-	@Override
-	public ArrayList<Cluster> kmeanscluster(int k) {
-		this.k = k;
-		initializeKMeans();
-		// for(double[] d : points) {
-		// printDoubleArray(d);
-		// }
-		//
-		boolean test = true;
-		// int i = 1;
-		while (test) {
-			relocateCenter();
-			test = relocatePoints();
-			// System.out.println("Durchlauf Nummer " + i);
-			// i++;
-		}
-		// System.out.println("schleife Verlassen");
-		// for (double[] c : pointsInCenter.keySet()) {
-		// printDoubleArray(c);
-		// }
-		// for (int h = 0; h<points.size();h++) {
-		// int indexofCenter = 0;
-		// for (int l = 0; l<center.size(); l++) {
-		// try {
-		// if(Arrays.equals(CenterOfPoint.get(points.get(h)), center.get(l))) {
-		// indexofCenter = l;
-		// }
-		// System.out.println("Abstand des Punktes "+h+ " zu Center " + l +" "+
-		// metric.computeDistance(points.get(h), center.get(l)));
-		// } catch (Exception e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// }
-		// System.out.println("Das Center das gewaehlt worden ist "+indexofCenter);
-		// System.out.println("----------------------------------------------------------------------------");
-		// }
-		return null;
-	}
-
-	@Override
-	public void initializeKMeans() {
-		initializeFirstCenter();
-		initializeFollowingCenter();
-		locateFirstPoints();
-	}
-
-	private void initializeFirstCenter() {
-		double[] firstCenter = new double[points.get(0).length];
-		for (int i = 0; i < points.get(0).length; i++) {
-			int totalvalue = points.size();
-			for (double[] d : points) {
-				if (Double.isNaN(d[i])) {
-					totalvalue--;
-				} else {
-					firstCenter[i] += d[i];
-				}
-			}
-			firstCenter[i] = firstCenter[i] / totalvalue;
-		}
-		center.add(firstCenter);
-		pointsInCenter.put(firstCenter, new ArrayList<double[]>());
-	}
-
-	private void locateFirstPoints() {
-		try {
-			for (double[] point : points) {
-				int indexOfMyCenter = 0;
-				double maxCenterDist = metric.computeDistance(point, center.get(0));
-				for (int i = 1; i < center.size(); i++) {
-					double tmp = metric.computeDistance(point, center.get(i));
-					if (tmp <= maxCenterDist) {
-						indexOfMyCenter = i;
-						maxCenterDist = tmp;
-					}
-				}
-				CenterOfPoint.put(point, center.get(indexOfMyCenter));
-				// oldCenterOfPoint.put(point, indexOfMyCenter);
-				pointsInCenter.get(center.get(indexOfMyCenter)).add(point);
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	private boolean relocatePoints() {
-		boolean hasSomethingChanged = false;
-		for (double[] c : center) {
-			pointsInCenter.get(c).clear();
-		}
-		try {
-			for (double[] point : points) {
-				double minDist = metric.computeDistance(point, center.get(0));
-				int indexOfMyCenter = 0;
-				for (int i = 1; i < center.size(); i++) {
-					double tmp = metric.computeDistance(point, center.get(i));
-					if (tmp < minDist) {
-						indexOfMyCenter = i;
-						minDist = tmp;
-					}
-				}
-				if (!Arrays.equals(CenterOfPoint.get(point), center.get(indexOfMyCenter))) {
-					hasSomethingChanged = true;
-					CenterOfPoint.replace(point, center.get(indexOfMyCenter));
-				}
-
-				// oldCenterOfPoint.replace(point, indexOfMyCenter);
-				pointsInCenter.get(center.get(indexOfMyCenter)).add(point);
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return hasSomethingChanged;
-	}
-
-	private void relocateCenter() {
-		for (int i = 0; i < center.size(); i++) {
-			int size = center.get(i).length;
-			double[] sumarray = new double[size];
-			double[] totalvalue = new double[size];
-			if (!pointsInCenter.get(center.get(i)).isEmpty()) {
-				for (double[] d : pointsInCenter.get(center.get(i))) {
-					for (int j = 0; j < d.length; j++) {
-						if (!Double.isNaN(d[j])) {
-							sumarray[j] += d[j];
-							totalvalue[j]++;
-						}
-					}
-				}
-
-				for (int l = 0; l < sumarray.length; l++) {
-					if (Double.isNaN(sumarray[l])) {
-						sumarray[l] = 0;
-					} else {
-						if (!(sumarray[l] == 0 || totalvalue[l] == 0)) {
-							sumarray[l] = sumarray[l] / totalvalue[l];
-						} else {
-							if (totalvalue[l] == 0) {
-								sumarray[l] = Double.NaN;
-							}
-						}
-
-					}
-				}
-			}
-			ArrayList<double[]> myPoints = pointsInCenter.remove(center.get(i));
-			pointsInCenter.put(sumarray, myPoints);
-			center.set(i, sumarray);
-		}
-
-	}
-
-	private void initializeFollowingCenter() {
-		for (int i = 1; i < k; i++) {
-			double maxsum = 0;
-			int indexOfnewCenter = 0;
-			int indexofnewCenterinInit = 0;
-			for (int j = 0; j < initpoints.size(); j++) {
-				double tmp = 0;
-				for (double[] c : center) {
-					try {
-						tmp += metric.computeDistance(initpoints.get(j), c);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				if (tmp >= maxsum) {
-					maxsum = tmp;
-					indexOfnewCenter = PositionOfPointInList.get(initpoints.get(j));
-					indexofnewCenterinInit = j;
-				}
-			}
-			initpoints.remove(indexofnewCenterinInit);
-			center.add(points.get(indexOfnewCenter));
-			
-			pointsInCenter.put(points.get(indexOfnewCenter), new ArrayList<double[]>());
-		}
-	}
-
-	private void clearKMeans() {
-		points.clear();
-		center.clear();
-		pointsInCenter.clear();
-		CenterOfPoint.clear();
-	}
-
-	private void postProcessing() {
-		// take all points that are associated with the Center and get the Index of each
-		// one and find the
-		// instance that produced this point. Create a Cluster with the center and all
-		// Instances that are
-		// associated to that center add the Cluster to the kmeansClusterlist.
-		for (double[] d : pointsInCenter.keySet()) {
-			ArrayList<double[]> poinstOfCenter = pointsInCenter.get(d);
-			Cluster c = new Cluster(new ArrayList<ProblemInstance<Instance>>(), new GroupIdentifier(d));
-			for (double[] point : poinstOfCenter) {
-				int indexOfPoint = PositionOfPointInList.get(point);
-				c.addInstance(instances.get(indexOfPoint));
-			}
-			kmeansCluster.add(c);
-		}
 	}
 
 	private void printDoubleArray(double[] d) {
 		for (int i = 0; i < d.length; i++) {
 			System.out.print("|" + d[i] + "|");
-			if (d[i] > 1 || d[i] < (-1)) {
-				System.out.print("---------------PROBLEM-------------------");
-			}
 		}
 		System.out.println(" ");
 	}

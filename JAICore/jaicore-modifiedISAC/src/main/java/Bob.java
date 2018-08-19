@@ -25,7 +25,7 @@ public class Bob {
 			// for(double d : toprint) {
 			// System.out.print(d+"||");
 			// }
-			L1DistanceMetric dist = new L1DistanceMetric();
+			
 			//System.out.println(dist.computeDistance(toprint, toprint2));
 			// double[] test = norm.getbasis();
 			//
@@ -47,7 +47,7 @@ public class Bob {
 //				System.out.println(" ");
 //			}
 			ArrayList<ProblemInstance<Instance>> instnaces = (ArrayList<ProblemInstance<Instance>>) coll.getProblemInstances();
-			Test tester = new Test(toClusterpoints, dist, instnaces);
+			Test tester = new Test(toClusterpoints, instnaces);
 			tester.gmeanscluster();
 			//ArrayList<Cluster> test = tester.kmeanscluster();
 			//for (Cluster c : test) {
