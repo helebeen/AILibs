@@ -53,8 +53,13 @@ public class Test extends Gmeans<double[], Double> {
 		}
 		
 		while (i <= k) {
+			
 			// looppoints are S_i the points are the points of the considered center C_i 
 			loopPoints = currentPoints.get(positionOfCenter.get(i));
+			if(loopPoints == null) {
+				i++;
+			}
+			else{
 			System.out.println(loopPoints.size());
 			// makes a new instance with of kmeans with S_i as base
 			TestKmeansEinzeln loopCluster = new TestKmeansEinzeln(loopPoints, dist);
@@ -107,7 +112,7 @@ public class Test extends Gmeans<double[], Double> {
 				positionOfCenter.replace(k,intermediateCenter.get(1));
 			} else {
 				i++;
-			}
+			}}
 			System.out.println("i: "+i+" k: "+k);
 		}
 		
