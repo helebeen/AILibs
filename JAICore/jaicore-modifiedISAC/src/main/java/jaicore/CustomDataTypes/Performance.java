@@ -14,7 +14,7 @@ public class Performance<P> {
 		this.performance = perform;
 	}
 	
-	public P getPerformance() {
+	public P getdirctPerformance() {
 		return performance;
 	}
 	public void setPerformance(P newperformance) {

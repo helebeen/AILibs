@@ -3,11 +3,10 @@ import java.util.ArrayList;
 
 import jaicore.CustomDataTypes.ProblemInstance;
 import jaicore.modifiedISAC.Cluster;
-import jaicore.modifiedISAC.GMeansForModifiedISAC;
 import jaicore.modifiedISAC.L1DistanceMetric;
 import jaicore.modifiedISAC.ModifiedISACInstanceCollector;
 import jaicore.modifiedISAC.Normalizer;
-import jaicore.modifiedISAC.Test;
+import jaicore.modifiedISAC.ModifiedISACgMeans;
 import weka.core.Instance;
 
 public class Bob {
@@ -47,7 +46,7 @@ public class Bob {
 //				System.out.println(" ");
 //			}
 			ArrayList<ProblemInstance<Instance>> instnaces = (ArrayList<ProblemInstance<Instance>>) coll.getProblemInstances();
-			Test tester = new Test(toClusterpoints, instnaces);
+			ModifiedISACgMeans tester = new ModifiedISACgMeans(toClusterpoints, instnaces);
 			tester.gmeanscluster();
 			//ArrayList<Cluster> test = tester.kmeanscluster();
 			//for (Cluster c : test) {

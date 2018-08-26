@@ -15,7 +15,7 @@ public class Ranking<S> {
 		this.ranking.add(newSolution);
 	}
 	
-	ArrayList<Solution<S>> getRanking(){
+	public ArrayList<Solution<S>> getRanking(){
 		return this.ranking;
 	}
 }

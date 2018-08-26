@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class TestKmeansEinzeln extends Kmeans<double[], Double> {
+public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 	private HashMap<double[], Integer> PositionOfPointInList = new HashMap<double[], Integer>();
 
 	private HashMap<double[], ArrayList<double[]>> pointsInCenter = new HashMap<double[], ArrayList<double[]>>();
@@ -12,7 +12,7 @@ public class TestKmeansEinzeln extends Kmeans<double[], Double> {
 	private ArrayList<double[]> initpoints = new ArrayList<double[]>();
 
 
-	public TestKmeansEinzeln(ArrayList<double[]> toClusterPoints, IDistanceMetric<Double, double[], double[]> dist) {
+	public ModifiedISACkMeans(ArrayList<double[]> toClusterPoints, IDistanceMetric<Double, double[], double[]> dist) {
 		super(toClusterPoints, dist);
 		for (int i = 0; i < toClusterPoints.size(); i++) {
 			PositionOfPointInList.put(toClusterPoints.get(i), i);
@@ -205,15 +205,15 @@ public class TestKmeansEinzeln extends Kmeans<double[], Double> {
 	public ArrayList<double[]> getCenter(){
 		return center;
 	}
-	private void printDoubleArray(double[] d) {
-		for (int i = 0; i < d.length; i++) {
-			System.out.print("|" + d[i] + "|");
-			if (d[i] > 1 || d[i] < (-1)) {
-				System.out.print("---------------PROBLEM-------------------");
-			}
-		}
-		System.out.println(" ");
-	}
+//	private void printDoubleArray(double[] d) {
+//		for (int i = 0; i < d.length; i++) {
+//			System.out.print("|" + d[i] + "|");
+//			if (d[i] > 1 || d[i] < (-1)) {
+//				System.out.print("---------------PROBLEM-------------------");
+//			}
+//		}
+//		System.out.println(" ");
+//	}
 
 
 }

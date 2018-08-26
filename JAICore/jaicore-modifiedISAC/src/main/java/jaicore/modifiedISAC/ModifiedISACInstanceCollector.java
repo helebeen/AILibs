@@ -5,7 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import DataManager.IInstanceCollector;
+import jaicore.CustomDataTypes.Performance;
 import jaicore.CustomDataTypes.ProblemInstance;
+import jaicore.CustomDataTypes.Solution;
+import jaicore.CustomDataTypes.Tuple;
+import weka.classifiers.CheckClassifier;
+import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -19,6 +24,13 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	/**
 	 * The collected and processed Instances
 	 */
+	private ArrayList<ArrayList<Tuple<Classifier,Double>>> collectedClassifierandPerformance;
+	//TODO implemntieren !!
+	private int numberOfClassifier;
+	private ArrayList<Classifier> allClassifier;
+
+
+
 	private ArrayList<ProblemInstance<Instance>> collectedInstances = new ArrayList<ProblemInstance<Instance>>();
 	private static ArrayList<String> AtributesofTrainingsdata = new ArrayList<String>();
 
@@ -29,7 +41,18 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	public static ArrayList<String> getAtributesofTrainingsdata() {
 		return AtributesofTrainingsdata;
 	}
-
+	
+	public ArrayList<ArrayList<Tuple<Classifier,Double>>> getCollectedClassifierandPerformance() {
+		return collectedClassifierandPerformance;
+	}
+	
+	public int getNumberOfClassifier() {
+		return numberOfClassifier;
+	}
+	
+	public ArrayList<Classifier> getAllClassifier() {
+		return allClassifier;
+	}
 	/** This constructor is used if a own file is used to extracted the training instances
 	 * The Instances has to only contain the metafeatures
 	 * @param filename
@@ -51,6 +74,24 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("metaData_smallDataSets_computed.arff");
 		DataSource source = new DataSource(inputStream);
 		Instances data = source.getDataSet();
+		int tmp = 0;
+//		for(Instance i : data) {
+//			ArrayList<Tuple<Solution<Classifier>,Performance<Double>>> pandc = new ArrayList<Tuple<Solution<Classifier>,Performance<Double>>>();	
+//			for(int j = i.numAttributes()-1; j>=103; j++) {
+//				Solution<Classifier> classi = new Solution<Classifier>(Classifier.);
+//				Performance<Double> perfo = new Performance<Double>(i.attribute(j));
+//				Tupel<Solution<Classifier>,Performance<Double>>> tup = new Tuple<Solution<Classifier>,Performance<Double>>>(classi,perfo);
+//				pandac.add(tup);
+//			}
+//			collectedClassifierandPerformance.add(pandac);
+//			tmp++;
+//		}
+		for(int i = 0; i<data.numInstances();i++) {
+			for(int j = data.numAttributes()-1; j>=103;j--) {
+				data.get(i);
+			}
+		}
+		
 		data.deleteAttributeAt(0);
 		for (int j = data.numAttributes() - 1; j >= 103; j--) {
 			data.deleteAttributeAt(j);

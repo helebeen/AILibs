@@ -10,6 +10,8 @@ public class CandidateProviderModifiedISAC implements IRankedSolutionCandidatePr
 	@Override
 	public ClassifierRankingForGroup getCandidate(ProblemInstance<Instance> instance) {
 			double[] vectorFormInstance = instance.getInstance().toDoubleArray();
+			// in welcher form kommt das object wenn instances
+			
 		return null;
 	}
 

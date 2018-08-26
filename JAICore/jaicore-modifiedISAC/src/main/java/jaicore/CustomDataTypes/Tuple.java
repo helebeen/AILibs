@@ -17,11 +17,11 @@ public class Tuple<S,P>{
 		this.performance = perfor;
 	}
 	
-	Solution<S> getSolution(){
+	public Solution<S> getSolution(){
 		return this.solution;
 	}
 	
-	Performance<P> getPerformance(){
+	public Performance<P> getPerformance(){
 		return this.performance;
 	}
 }

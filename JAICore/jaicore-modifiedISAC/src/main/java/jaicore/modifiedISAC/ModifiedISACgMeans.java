@@ -8,7 +8,7 @@ import jaicore.CustomDataTypes.ProblemInstance;
 import weka.core.Instance;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-public class Test extends Gmeans<double[], Double> {
+public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 	private ArrayList<ProblemInstance<Instance>> instances;
 	private ArrayList<Cluster> gmeansCluster;
 	private ArrayList<double[]> intermediateCenter;
@@ -24,7 +24,7 @@ public class Test extends Gmeans<double[], Double> {
 	 * @param toClusterPoints
 	 * @param instances
 	 */
-	public Test(ArrayList<double[]> toClusterPoints, ArrayList<ProblemInstance<Instance>> instances) {
+	public ModifiedISACgMeans(ArrayList<double[]> toClusterPoints, ArrayList<ProblemInstance<Instance>> instances) {
 		super(toClusterPoints);
 		this.instances = instances;
 		this.gmeansCluster = new ArrayList<Cluster>();
@@ -40,7 +40,7 @@ public class Test extends Gmeans<double[], Double> {
 		int i = 1;
 		// creates a k means clustering instance with all points and an L1 distance
 		// metric as metric
-		TestKmeansEinzeln test = new TestKmeansEinzeln(points, dist);
+		ModifiedISACkMeans test = new ModifiedISACkMeans(points, dist);
 		// clusters all points with k = 1
 		currentPoints = test.kmeanscluster(k);
 		// puts the first center into the list of center
@@ -58,12 +58,13 @@ public class Test extends Gmeans<double[], Double> {
 
 			// looppoints are S_i the points are the points of the considered center C_i
 			loopPoints = currentPoints.get(positionOfCenter.get(i));
-			if (loopPoints == null) {
-				i++;
-			} else {
+//			if (loopPoints == null) {
+//				i++;
+//			} else {
+				System.out.println(loopPoints == null);
 				System.out.println(loopPoints.size());
 				// makes a new instance with of kmeans with S_i as base
-				TestKmeansEinzeln loopCluster = new TestKmeansEinzeln(loopPoints, dist);
+				ModifiedISACkMeans loopCluster = new ModifiedISACkMeans(loopPoints, dist);
 				// clusters S_I into to cluster intermediate points is a HashMap of center with
 				// an ArrayList of thier
 				// corresponding points
@@ -83,18 +84,18 @@ public class Test extends Gmeans<double[], Double> {
 						w += Math.pow(v[l], 2);
 					}
 				}
-
-				double[] y = new double[points.size()];
+				
+				double[] y = new double[loopPoints.size()];
 				// All points are projected onto a points by multiplying every entry of point
 				// with the corresponding
 				// entry of v and divide by the w.
 				// For every point the all entrys modified that way are than summed.
 				// if the entry of v is Nan or the entry of the point the entry is ignored
-				for (int r = 0; r < points.size(); r++) {
-					for (int p = 0; p < points.get(r).length; p++) {
-						if (!Double.isNaN(points.get(r)[p])) {
+				for (int r = 0; r < loopPoints.size(); r++) {
+					for (int p = 0; p < loopPoints.get(r).length; p++) {
+						if (!Double.isNaN(loopPoints.get(r)[p])) {
 							if (!Double.isNaN(v[p])) {
-								y[r] += (v[p] * points.get(r)[p]) / w;
+								y[r] += (v[p] * loopPoints.get(r)[p]) / w;
 							}
 							// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wäre es
 							// 1 oder nichts machen ?
@@ -109,7 +110,9 @@ public class Test extends Gmeans<double[], Double> {
 				// from C`_2 S`_2
 				// if the test is passed i is raised.
 				if (!andersonDarlingTest(y)) {
+					System.out.println("Im test");
 					currentPoints.remove(positionOfCenter.get(i));
+					System.out.println("ist das der key ? "+ intermediatePoints.containsKey(intermediateCenter.get(0)));
 					currentPoints.put(intermediateCenter.get(0), intermediatePoints.get(intermediateCenter.get(0)));
 					positionOfCenter.replace(i, intermediateCenter.get(0));
 					k++;
@@ -119,7 +122,7 @@ public class Test extends Gmeans<double[], Double> {
 				} else {
 					i++;
 				}
-			}
+//			}
 			System.out.println("i: " + i + " k: " + k);
 		}
 		try {

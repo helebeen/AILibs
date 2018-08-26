@@ -18,7 +18,7 @@ public class RankingForGroup<C,S> extends Ranking<S>{
 		this.identifierOfGroup=identifier;	
 	}
 	
-	GroupIdentifier<C> getIdentifierForGroup(){
+	public GroupIdentifier<C> getIdentifierForGroup(){
 		return identifierOfGroup;
 	}
 }
