@@ -116,9 +116,8 @@ public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 					currentPoints.put(intermediateCenter.get(0), intermediatePoints.get(intermediateCenter.get(0)));
 					positionOfCenter.replace(i, intermediateCenter.get(0));
 					k++;
-					currentPoints.remove(positionOfCenter.get(k));
 					currentPoints.put(intermediateCenter.get(1), intermediatePoints.get(intermediateCenter.get(1)));
-					positionOfCenter.replace(k, intermediateCenter.get(1));
+					positionOfCenter.put(k, intermediateCenter.get(1));
 				} else {
 					i++;
 				}

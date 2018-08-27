@@ -16,5 +16,5 @@ import jaicore.CustomDataTypes.ProblemInstance;
  *            Probleminstaces to group and grouped instances
  */
 public interface IGroupBuilder<C, I> {
-	List<Group<C, I>> buildGroup(List<ProblemInstance<I>> allInstances);
+	List<? extends Group<C, I>> buildGroup(List<ProblemInstance<I>> allInstances);
 }

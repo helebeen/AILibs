@@ -11,10 +11,10 @@ import weka.core.Instance;
 public class ModifiedISACGroupBuilder implements IGroupBuilder<double[], Instance> {
 	private ArrayList<double[]> points;
 	@Override
-	public List<Group<double[], Instance>> buildGroup(List<ProblemInstance<Instance>> allInstances) {
+	public List<? extends Group<double[], Instance>> buildGroup(List<ProblemInstance<Instance>> allInstances) {
 		ModifiedISACgMeans groupBuilder = new ModifiedISACgMeans(points, (ArrayList<ProblemInstance<Instance>>) allInstances);
 		ArrayList<Cluster> foundCluster = groupBuilder.gmeanscluster();
-		return null;//foundCluster;
+		return foundCluster;
 	}
 	
 	public void setPoints(ArrayList<double[]> toSetPoints) {
