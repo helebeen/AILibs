@@ -5,7 +5,7 @@ import jaicore.CustomDataTypes.ProblemInstance;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 
-public class CandidateProviderModifiedISAC implements IRankedSolutionCandidateProvider<Instance, Classifier> {
+public class CandidateProviderModifiedISAC implements IRankedSolutionCandidateProvider<Instance, String> {
 
 	@Override
 	public ClassifierRankingForGroup getCandidate(ProblemInstance<Instance> instance) {

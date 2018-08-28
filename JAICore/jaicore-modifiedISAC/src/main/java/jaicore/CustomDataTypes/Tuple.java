@@ -9,19 +9,19 @@ package jaicore.CustomDataTypes;
  * @param <P> A performance value
  */
 public class Tuple<S,P>{
-	private Solution<S> solution;
-	private Performance<P> performance;
+	private S solution;
+	private P performance;
 	
-	Tuple(Solution<S> solu, Performance<P> perfor){
+	public Tuple(S solu, P perfor){
 		this.solution = solu;
 		this.performance = perfor;
 	}
 	
-	public Solution<S> getSolution(){
+	public S getSolution(){
 		return this.solution;
 	}
 	
-	public Performance<P> getPerformance(){
+	public P getPerformance(){
 		return this.performance;
 	}
 }

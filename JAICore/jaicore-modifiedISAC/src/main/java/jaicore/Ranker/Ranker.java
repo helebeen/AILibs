@@ -2,8 +2,8 @@ package jaicore.Ranker;
 
 import jaicore.CustomDataTypes.Ranking;
 
-public interface Ranker<S> {
+public interface Ranker<S,P> {
 	public void bulidRanker();
 
-	public Ranking<S> getRanking();
+	public Ranking<S> getRanking(P problem);
 }

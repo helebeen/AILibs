@@ -14,7 +14,7 @@ import jaicore.Ranker.Ranker;
  * for groups of them
  * @param <P> The performances of the solution for a given Problem instance.
  */
-abstract public class GroupBasedRanker<C,I,S,P> implements Ranker<S>{
+abstract public class GroupBasedRanker<C,I,S,P> implements Ranker<S,I>{
 	IInstanceCollector<I> instancecollection;
 	ITableGeneratorandCompleter<I,S,P> informationForRankingOfInstances;
 	
@@ -24,6 +24,6 @@ abstract public class GroupBasedRanker<C,I,S,P> implements Ranker<S>{
 	}
 	
 	@Override
-	public abstract RankingForGroup<C,S> getRanking();
+	public abstract RankingForGroup<C,S> getRanking(I prob);
 	
 }

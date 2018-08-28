@@ -8,10 +8,10 @@ import jaicore.CustomDataTypes.Table;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 
-public class ModifiedISACTableGeneratorandCompleter implements ITableGeneratorandCompleter<Instance, Classifier,Double> {
+public class ModifiedISACTableGeneratorandCompleter implements ITableGeneratorandCompleter<Instance, String,Double> {
 
 	@Override
-	public Table<Instance, Classifier, Double> getInforamtionforRanking(
+	public Table<Instance, String, Double> getInforamtionforRanking(
 			List<ProblemInstance<Instance>> InstancesToRank) {
 		// TODO Auto-generated method stub
 		return null;

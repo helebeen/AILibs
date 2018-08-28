@@ -4,21 +4,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import jaicore.CustomDataTypes.GroupIdentifier;
 import jaicore.CustomDataTypes.Performance;
 import jaicore.CustomDataTypes.ProblemInstance;
 import jaicore.CustomDataTypes.RankingForGroup;
 import jaicore.CustomDataTypes.Solution;
 import jaicore.CustomDataTypes.Tuple;
 import jaicore.GroupBasedRanker.GroupBasedRanker;
-import weka.classifiers.CheckClassifier;
-import weka.classifiers.Classifier;
 import weka.core.Instance;
 
-public class ModifiedISAC extends GroupBasedRanker<double [],Instance, Classifier, Double> {
+public class ModifiedISAC extends GroupBasedRanker<double [],Instance, String, Double> {
 	
 	private HashMap<double[],Integer> positionOfInstance = new HashMap<double[],Integer>();
-	private ArrayList<ClassifierRankingForGroup> rankings;
+	private ArrayList<ClassifierRankingForGroup> rankings = new ArrayList<ClassifierRankingForGroup>();
 	private ArrayList<Cluster> foundCluster;
 	public ModifiedISAC(ModifiedISACInstanceCollector instcoll,
 			ModifiedISACTableGeneratorandCompleter table) {
@@ -49,7 +46,7 @@ public class ModifiedISAC extends GroupBasedRanker<double [],Instance, Classifie
 				tmp++;
 			}
 			
-			//foundCluster = builder.buildGroup(collectedInstances);
+			foundCluster = (ArrayList<Cluster>) builder.buildGroup(collectedInstances);
 			constructRanking(collector);
 			
 		} catch (Exception e) {
@@ -60,14 +57,20 @@ public class ModifiedISAC extends GroupBasedRanker<double [],Instance, Classifie
 	}
 	private void constructRanking(ModifiedISACInstanceCollector collector) {
 		for(Cluster c: foundCluster) {
-			ArrayList<Solution<Classifier>> ranking = new ArrayList<Solution<Classifier>>();
+			ArrayList<Solution<String>> ranking = new ArrayList<Solution<String>>();
 			int [] tmp = new int[collector.getNumberOfClassifier()];
 			double[] clusterMean = new double[collector.getNumberOfClassifier()];
 			for(ProblemInstance<Instance> prob :c.getInstances()) {
-				ArrayList<Tuple<Classifier, Double>> solutionsOfPoint = collector.getCollectedClassifierandPerformance().get(positionOfInstance.get(prob.getInstance().toDoubleArray()));
+				int myIndex = 0;
+				for(double [] d : positionOfInstance.keySet()) {
+					if(Arrays.equals(d,prob.getInstance().toDoubleArray())) {
+						myIndex = positionOfInstance.get(d);
+					}
+				}
+				ArrayList<Tuple<Solution<String>, Performance<Double>>> solutionsOfPoint = collector.getCollectedClassifierandPerformance().get(myIndex);
 				for(int i = 0; i< solutionsOfPoint.size();i++) {
 					double perfo = solutionsOfPoint.get(i).getPerformance().getdirctPerformance();
-					if(Double.isNaN(perfo)) {
+					if(!Double.isNaN(perfo)) {
 						clusterMean[i] += perfo;
 						tmp[i]++;
 					}
@@ -76,35 +79,64 @@ public class ModifiedISAC extends GroupBasedRanker<double [],Instance, Classifie
 			for(int i = 0; i<clusterMean.length;i++) {
 				clusterMean[i] = clusterMean[i]/tmp[i];
 			}
-			HashMap<Double,Integer> reminder = new HashMap<Double,Integer>();
-			int counter = 0;
-			for(double d : clusterMean) {
-				reminder.put(d,counter);
-				counter++;
+//			HashMap<String,Integer> reminder = new HashMap<String,Integer>();
+//			for(int i =0; i< clusterMean.length;i++) {
+//				reminder.put(collector.getAllClassifier().get(i),i);
+//			}
+//			Arrays.sort(clusterMean);
+//			for(int i = clusterMean.length-1;i>= 0; i--) {
+//				int index = reminder.get(collector.getAllClassifier().get(i));
+//				ranking.add(new Solution<String>(collector.getAllClassifier().get(index)));
+//			}
+			ArrayList<String> testtest = collector.getAllClassifier();
+			HashMap<String,Double> test = new HashMap<String,Double>();
+			for(int i = 0; i < clusterMean.length;i++) {
+				test.put(testtest.get(i), clusterMean[i]);
 			}
-			Arrays.sort(clusterMean);
-			for(int i = clusterMean.length-1;i>= 0; i--) {
-				int index = reminder.get(clusterMean[i]);
-				ranking.add(new Solution(collector.getAllClassifier().get(index)));
+
+			while(!test.isEmpty()) {
+				double max = Double.MAX_VALUE;
+				String classi = null;
+				for(String str: test.keySet()) {
+					double candidate = test.get(str);
+					if(candidate<=max) {
+						classi = str;
+						max = candidate;
+					}
+				}
+				ranking.add(new Solution<String>(classi));
+				test.remove(classi);
 			}
 			rankings.add(new ClassifierRankingForGroup(c.getId(),ranking));
+			
 		}
 	}
-	@Override
-	public RankingForGroup<double[], Classifier> getRanking() {
-		// TODO Auto-generated method stub
-		//TODO muss den Übergabewert auf den Punktändern
-//		L1DistanceMetric dist = new L1DistanceMetric();
-//		RankingForGroup<double[],Classifier> myRanking;
-//		double minDist = Double.MAX_VALUE;
-//		for(RankingForGroup<double[],Classifier> rank : rankings) {
-//			double computedDist = dist.computeDistance(rank.getIdentifierForGroup().getIdentifier(),point);
-//			if(computedDist <= minDist) {
-//				myRanking = rank;
-//				minDist = computedDist;
-//			}
-//		}
-		return null;//ranking; 
-	}
 
+
+	@Override
+	public RankingForGroup<double[], String> getRanking(Instance prob) {
+		RankingForGroup<double[],String> myRanking = null;
+		try {
+		L1DistanceMetric dist = new L1DistanceMetric();
+		double[] point = prob.toDoubleArray();
+		double minDist = Double.MAX_VALUE;
+		for(RankingForGroup<double[],String> rank : rankings) {
+			double computedDist;
+			computedDist = dist.computeDistance(rank.getIdentifierForGroup().getIdentifier(),point);
+			if(computedDist <= minDist) {
+				myRanking = rank;
+				minDist = computedDist;
+				}
+			}
+		
+		} catch (Exception e) { 
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return myRanking; 
+		}
+	
+	public ArrayList<ClassifierRankingForGroup> getRankings(){
+		return this.rankings;
+	}
 }

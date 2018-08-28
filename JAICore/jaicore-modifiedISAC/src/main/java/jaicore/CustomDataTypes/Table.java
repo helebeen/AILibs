@@ -15,10 +15,10 @@ import java.util.ArrayList;
  */
 
 public class Table<I,S,P> {
-	HashMap<ProblemInstance<I>,ArrayList<Tuple<S,P>>> InformationForRanking;
+	HashMap<ProblemInstance<I>,ArrayList<Tuple<Solution<S>,Performance<P>>>> InformationForRanking;
 	
 	public Table(){
-		this.InformationForRanking = new HashMap<ProblemInstance<I>,ArrayList<Tuple<S,P>>>();
+		this.InformationForRanking = new HashMap<ProblemInstance<I>,ArrayList<Tuple<Solution<S>,Performance<P>>>>();
 	}
 
 	/**
@@ -27,9 +27,9 @@ public class Table<I,S,P> {
 	 * @return Gives an ArrayList with all solutions for a probleminstance
 	 */
 	ArrayList<Solution<S>> getSolutionforProblemInstanceTable(ProblemInstance<I> consideredProblemInstance){
-		ArrayList<Tuple<S,P>> listOfInformationForProblemInst = this.InformationForRanking.get(consideredProblemInstance);
+		ArrayList<Tuple<Solution<S>,Performance<P>>> listOfInformationForProblemInst = this.InformationForRanking.get(consideredProblemInstance);
 		ArrayList<Solution<S>> SolutionsForInstance = new ArrayList<Solution<S>>();
-		for(Tuple<S,P> i:listOfInformationForProblemInst) {
+		for(Tuple<Solution<S>, Performance<P>> i:listOfInformationForProblemInst) {
 			SolutionsForInstance.add(i.getSolution());
 		}
 		return SolutionsForInstance;
@@ -41,9 +41,9 @@ public class Table<I,S,P> {
 	 * @return Gives an ArrayList with all performances for a probleminstance
 	 */
 	ArrayList<Performance<P>> getPerformanceforProblemInstanceTable(ProblemInstance<I> consideredProblemInstance){
-		ArrayList<Tuple<S,P>> listOfInformationForProblemInst = this.InformationForRanking.get(consideredProblemInstance);
+		ArrayList<Tuple<Solution<S>, Performance<P>>> listOfInformationForProblemInst = this.InformationForRanking.get(consideredProblemInstance);
 		ArrayList<Performance<P>> PerformanceForInstance = new ArrayList<Performance<P>>();
-		for(Tuple<S,P> i:listOfInformationForProblemInst) {
+		for(Tuple<Solution<S>, Performance<P>> i:listOfInformationForProblemInst) {
 			PerformanceForInstance.add(i.getPerformance());
 		}
 		return PerformanceForInstance;
@@ -55,7 +55,7 @@ public class Table<I,S,P> {
 	 * @param consideredProblemInstance the considered problemInstance
 	 * @return Gives an ArrayList of tuple consisting of the solution and its performance
 	 */
-	ArrayList<Tuple<S,P>> getInfromationforInstance(ProblemInstance<I> consideredProblemInstance){
+	ArrayList<Tuple<Solution<S>, Performance<P>>> getInfromationforInstance(ProblemInstance<I> consideredProblemInstance){
 		return this.InformationForRanking.get(consideredProblemInstance);
 	}
 	
@@ -64,7 +64,7 @@ public class Table<I,S,P> {
 	 * @return The hashmap with the probleminstances as keys and their solutions and the according
 	 * performances as values.
 	 */
-	HashMap<ProblemInstance<I>,ArrayList<Tuple<S,P>>> getInformationForRanking(){
+	HashMap<ProblemInstance<I>, ArrayList<Tuple<Solution<S>, Performance<P>>>> getInformationForRanking(){
 		return this.InformationForRanking;
 	}
 	
@@ -73,7 +73,7 @@ public class Table<I,S,P> {
 	 * @param newProblemInstanceForTab the new Instance
 	 * @param informationForInstance adds a new key,value pair to the Hashmap Table
 	 */
-	void addProblemInstanceToTable(ProblemInstance<I> newProblemInstanceForTab, ArrayList<Tuple<S,P>> informationForInstance){
+	void addProblemInstanceToTable(ProblemInstance<I> newProblemInstanceForTab, ArrayList<Tuple<Solution<S>, Performance<P>>> informationForInstance){
 		this.InformationForRanking.put(newProblemInstanceForTab,informationForInstance);	
 	}
 }

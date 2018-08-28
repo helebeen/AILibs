@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import jaicore.CustomDataTypes.GroupIdentifier;
 import jaicore.CustomDataTypes.ProblemInstance;
 import weka.core.Instance;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class ModifiedISACgMeans extends Gmeans<double[], Double> {
-	private ArrayList<ProblemInstance<Instance>> instances;
 	private ArrayList<Cluster> gmeansCluster;
 	private ArrayList<double[]> intermediateCenter;
 	private HashMap<double[], ArrayList<double[]>> currentPoints;
 	private HashMap<double[], ArrayList<double[]>> intermediatePoints;
+	private HashMap<double[],ProblemInstance<Instance>> pointToInstance;
 	private ArrayList<double[]> loopPoints;
 	L1DistanceMetric dist = new L1DistanceMetric();
 
@@ -26,7 +27,10 @@ public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 	 */
 	public ModifiedISACgMeans(ArrayList<double[]> toClusterPoints, ArrayList<ProblemInstance<Instance>> instances) {
 		super(toClusterPoints);
-		this.instances = instances;
+		pointToInstance = new HashMap<double[],ProblemInstance<Instance>>();
+		for(int i = 0; i < instances.size();i++) {
+			pointToInstance.put(toClusterPoints.get(i),instances.get(i));
+		}
 		this.gmeansCluster = new ArrayList<Cluster>();
 
 	}
@@ -58,87 +62,86 @@ public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 
 			// looppoints are S_i the points are the points of the considered center C_i
 			loopPoints = currentPoints.get(positionOfCenter.get(i));
-//			if (loopPoints == null) {
-//				i++;
-//			} else {
-				System.out.println(loopPoints == null);
-				System.out.println(loopPoints.size());
-				// makes a new instance with of kmeans with S_i as base
-				ModifiedISACkMeans loopCluster = new ModifiedISACkMeans(loopPoints, dist);
-				// clusters S_I into to cluster intermediate points is a HashMap of center with
-				// an ArrayList of thier
-				// corresponding points
-				intermediatePoints = loopCluster.kmeanscluster(2);
-				// intermediate Center saves the found two Center C`_1 und C`_2
-				intermediateCenter = loopCluster.getCenter();
+			// makes a new instance with of kmeans with S_i as base
+			ModifiedISACkMeans loopCluster = new ModifiedISACkMeans(loopPoints, dist);
+			// clusters S_I into to cluster intermediate points is a HashMap of center with
+			// an ArrayList of thier
+			// corresponding points
+			intermediatePoints = loopCluster.kmeanscluster(2);
+			// intermediate Center saves the found two Center C`_1 und C`_2
+			intermediateCenter = loopCluster.getCenter();
 
-				// the difference between the two new Center
-				double[] v = difference(intermediateCenter.get(0), intermediateCenter.get(1));
+			// the difference between the two new Center
+			double[] v = difference(intermediateCenter.get(0), intermediateCenter.get(1));
 
-				double w = 0;
-				// w is calculated as the summed squares of the entries of the difference
-				// between the center
-				// if the entry is NaN it is ignored in the sum
-				for (int l = 0; l < v.length; l++) {
-					if (!Double.isNaN(v[l])) {
-						w += Math.pow(v[l], 2);
-					}
+			double w = 0;
+			// w is calculated as the summed squares of the entries of the difference
+			// between the center
+			// if the entry is NaN it is ignored in the sum
+			for (int l = 0; l < v.length; l++) {
+				if (!Double.isNaN(v[l])) {
+					w += Math.pow(v[l], 2);
 				}
-				
-				double[] y = new double[loopPoints.size()];
-				// All points are projected onto a points by multiplying every entry of point
-				// with the corresponding
-				// entry of v and divide by the w.
-				// For every point the all entrys modified that way are than summed.
-				// if the entry of v is Nan or the entry of the point the entry is ignored
-				for (int r = 0; r < loopPoints.size(); r++) {
-					for (int p = 0; p < loopPoints.get(r).length; p++) {
-						if (!Double.isNaN(loopPoints.get(r)[p])) {
-							if (!Double.isNaN(v[p])) {
-								y[r] += (v[p] * loopPoints.get(r)[p]) / w;
-							}
-							// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wäre es
-							// 1 oder nichts machen ?
+			}
+
+			double[] y = new double[loopPoints.size()];
+			// All points are projected onto a points by multiplying every entry of point
+			// with the corresponding
+			// entry of v and divide by the w.
+			// For every point the all entrys modified that way are than summed.
+			// if the entry of v is Nan or the entry of the point the entry is ignored
+			for (int r = 0; r < loopPoints.size(); r++) {
+				for (int p = 0; p < loopPoints.get(r).length; p++) {
+					if (!Double.isNaN(loopPoints.get(r)[p])) {
+						if (!Double.isNaN(v[p])) {
+							y[r] += (v[p] * loopPoints.get(r)[p]) / w;
 						}
+						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als wäre es
+						// 1 oder nichts machen ?
 					}
 				}
-				// if the Anderson Darling test is failed the the center C_i is replaced by C`_1
-				// and S_i is replaced by the
-				// points of C`_1.
-				// k is raised by 1.
-				// C_k is replaced by C`_2 and the points of C_k S_k are replaced by the one
-				// from C`_2 S`_2
-				// if the test is passed i is raised.
-				if (!andersonDarlingTest(y)) {
-					System.out.println("Im test");
-					currentPoints.remove(positionOfCenter.get(i));
-					System.out.println("ist das der key ? "+ intermediatePoints.containsKey(intermediateCenter.get(0)));
-					currentPoints.put(intermediateCenter.get(0), intermediatePoints.get(intermediateCenter.get(0)));
-					positionOfCenter.replace(i, intermediateCenter.get(0));
-					k++;
-					currentPoints.put(intermediateCenter.get(1), intermediatePoints.get(intermediateCenter.get(1)));
-					positionOfCenter.put(k, intermediateCenter.get(1));
-				} else {
-					i++;
-				}
-//			}
-			System.out.println("i: " + i + " k: " + k);
+			}
+			// if the Anderson Darling test is failed the the center C_i is replaced by C`_1
+			// and S_i is replaced by the
+			// points of C`_1.
+			// k is raised by 1.
+			// C_k is replaced by C`_2 and the points of C_k S_k are replaced by the one
+			// from C`_2 S`_2
+			// if the test is passed i is raised.
+			if (!andersonDarlingTest(y)) {
+				currentPoints.remove(positionOfCenter.get(i));
+				currentPoints.put(intermediateCenter.get(0), intermediatePoints.get(intermediateCenter.get(0)));
+				positionOfCenter.replace(i, intermediateCenter.get(0));
+				k++;
+				currentPoints.put(intermediateCenter.get(1), intermediatePoints.get(intermediateCenter.get(1)));
+				positionOfCenter.put(k, intermediateCenter.get(1));
+			} else {
+				i++;
+			}
 		}
 		try {
 			mergeCluster(currentPoints);
+			for(double[]d : currentPoints.keySet()) {
+				ArrayList<double[]> pointsInCluster = currentPoints.get(d);
+				ArrayList<ProblemInstance<Instance>> instancesInCluster = new ArrayList<ProblemInstance<Instance>>();
+				for(double[] point : pointsInCluster) {
+					instancesInCluster.add(pointToInstance.get(point));
+				}
+				gmeansCluster.add(new Cluster(instancesInCluster,new GroupIdentifier<double[]>(d)));
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Done");
-		for (double[] d : currentPoints.keySet()) {
-			System.out.print("Center: ");
-			printDoubleArray(d);
-			for (double[] j : currentPoints.get(d)) {
-				printDoubleArray(j);
-			}
-		}
-		return null;
+//		System.out.println("Done");
+//		for (double[] d : currentPoints.keySet()) {
+//			System.out.print("Center: ");
+//			printDoubleArray(d);
+//			for (double[] j : currentPoints.get(d)) {
+//				printDoubleArray(j);
+//			}
+//		}
+		return gmeansCluster;
 	}
 
 	private void mergeCluster(HashMap<double[], ArrayList<double[]>> currentPoints) throws Exception {
@@ -171,23 +174,6 @@ public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 		// negative too !!
 		Arrays.sort(d);
 
-		// boolean Nanfound = false;
-		// int loopruns = -1;
-		// while(!Nanfound) {
-		// loopruns++;
-		// if(loopruns == d.length||Double.isNaN(d[loopruns])){
-		// Nanfound = true;
-		// }
-		// }
-		//
-		// for(int i = 0; i <(int)Math.floor(loopruns/2); i++) {
-		// double tmp = d[i];
-		// d[i] = d[(loopruns-1)-i];
-		// d[(loopruns-1)-i] = tmp;
-		// }
-		// prints the sorted double arry in the consol
-		printDoubleArray(d);
-
 		double mean = 0;
 		double variance = 0;
 
@@ -217,8 +203,6 @@ public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 		// divided by the standard deviation
 		// if the value of d is NaN the entry in the standardization is also NaN
 		double[] y = standraizeRandomVariable(d, mean, variance);
-		System.out.print("Das sind die standartisierten werte ");
-		printDoubleArray(y);
 		// Are also negative!!
 		// total value is equivalent to y.length
 		// first part of A^2 is -n overall A^2 = -n-second Part.
@@ -232,12 +216,12 @@ public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 
 		for (int i = 1; i < y.length; i++) {
 			if (!Double.isNaN(y[i])) {
-				// aSquare2 += ((2 * i) - 1) *
-				// ((Math.log(normal.cumulativeProbability(y[i-1])))+
-				// Math.log(1 - (normal.cumulativeProbability(y[((y.length) - i)]))));
+				 aSquare2 += ((2 * i) - 1) *
+				 ((Math.log(normal.cumulativeProbability(y[i-1])))+
+				 Math.log(1 - (normal.cumulativeProbability(y[((y.length) - i)]))));
 
-				aSquare2 += ((2 * i - 1) * (Math.log(normal.cumulativeProbability(y[i - 1])))
-						+ (2 * (y.length - i) + 1) * (Math.log(1 - normal.cumulativeProbability(y[i - 1]))));
+//				aSquare2 += ((2 * i - 1) * (Math.log(normal.cumulativeProbability(y[i - 1])))
+//						+ (2 * (y.length - i) + 1) * (Math.log(1 - normal.cumulativeProbability(y[i - 1]))));
 
 			}
 		}
@@ -247,8 +231,6 @@ public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 		double aSqurestar = aSquare1 - aSquare2;
 		// double aSqurestar = aSqure * (1 + (4 / y.length) - (25 / (Math.pow(y.length,
 		// 2))));
-		System.out.println("A2star = " + aSqurestar);
-		System.out.println(y.length);
 		// for different sample sizes the threshold weather the distribution is normal
 		// or not varies a little.
 		// Overall if A^2^* is greater than the threshold than the test fails

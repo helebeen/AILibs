@@ -9,8 +9,6 @@ import jaicore.CustomDataTypes.Performance;
 import jaicore.CustomDataTypes.ProblemInstance;
 import jaicore.CustomDataTypes.Solution;
 import jaicore.CustomDataTypes.Tuple;
-import weka.classifiers.CheckClassifier;
-import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -24,10 +22,10 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	/**
 	 * The collected and processed Instances
 	 */
-	private ArrayList<ArrayList<Tuple<Classifier,Double>>> collectedClassifierandPerformance;
-	//TODO implemntieren !!
-	private int numberOfClassifier;
-	private ArrayList<Classifier> allClassifier;
+	private ArrayList<ArrayList<Tuple<Solution<String>,Performance<Double>>>> collectedClassifierandPerformance;
+	
+	private int numberOfClassifier=21;
+	private ArrayList<String> allClassifier = new ArrayList<String>();
 
 
 
@@ -42,7 +40,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		return AtributesofTrainingsdata;
 	}
 	
-	public ArrayList<ArrayList<Tuple<Classifier,Double>>> getCollectedClassifierandPerformance() {
+	public  ArrayList<ArrayList<Tuple<Solution<String>,Performance<Double>>>> getCollectedClassifierandPerformance() {
 		return collectedClassifierandPerformance;
 	}
 	
@@ -50,7 +48,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		return numberOfClassifier;
 	}
 	
-	public ArrayList<Classifier> getAllClassifier() {
+	public ArrayList<String> getAllClassifier() {
 		return allClassifier;
 	}
 	/** This constructor is used if a own file is used to extracted the training instances
@@ -74,18 +72,27 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("metaData_smallDataSets_computed.arff");
 		DataSource source = new DataSource(inputStream);
 		Instances data = source.getDataSet();
-		int tmp = 0;
-//		for(Instance i : data) {
-//			ArrayList<Tuple<Solution<Classifier>,Performance<Double>>> pandc = new ArrayList<Tuple<Solution<Classifier>,Performance<Double>>>();	
-//			for(int j = i.numAttributes()-1; j>=103; j++) {
-//				Solution<Classifier> classi = new Solution<Classifier>(Classifier.);
-//				Performance<Double> perfo = new Performance<Double>(i.attribute(j));
-//				Tupel<Solution<Classifier>,Performance<Double>>> tup = new Tuple<Solution<Classifier>,Performance<Double>>>(classi,perfo);
-//				pandac.add(tup);
-//			}
-//			collectedClassifierandPerformance.add(pandac);
-//			tmp++;
-//		}
+		
+		collectedClassifierandPerformance = new ArrayList<ArrayList<Tuple<Solution<String>,Performance<Double>>>>();
+		
+		for(Instance i : data) {
+			ArrayList<Tuple<Solution<String>,Performance<Double>>> pandc = new ArrayList<Tuple<Solution<String>,Performance<Double>>>();	
+			for(int j = i.numAttributes()-1; j>104; j--) {
+				Solution<String> classi = new Solution<String>(i.attribute(j).name());
+				Performance<Double> perfo = new Performance<Double>(i.value(j));
+				Tuple<Solution<String>, Performance<Double>> tup = new Tuple<Solution<String>,Performance<Double>>(classi,perfo);
+				pandc.add(tup);
+			}
+			collectedClassifierandPerformance.add(pandc);
+		}
+		
+		Instance inst = data.get(0);
+		for(int i = inst.numAttributes()-1;i>104;i--) {
+			allClassifier.add(inst.attribute(i).name());
+		}
+		for(String solu :allClassifier) {
+			System.out.println(solu);
+		}
 		for(int i = 0; i<data.numInstances();i++) {
 			for(int j = data.numAttributes()-1; j>=103;j--) {
 				data.get(i);
@@ -103,7 +110,9 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 			collectedInstances.add(new ProblemInstance<Instance>(i));
 		}
 	}
-
+	public void setNumberOfClassifier(int number) {
+		this.numberOfClassifier = number;
+	}
 	@Override
 	public List<ProblemInstance<Instance>> getProblemInstances() {
 		return this.collectedInstances;

@@ -24,39 +24,11 @@ public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 	public HashMap<double[],ArrayList<double[]>> kmeanscluster(int k) {
 		this.k = k;
 		initializeKMeans();
-		// for(double[] d : points) {
-		// printDoubleArray(d);
-		// }
-		//
 		boolean test = true;
-		// int i = 1;
 		while (test) {
 			relocateCenter();
 			test = relocatePoints();
-			// System.out.println("Durchlauf Nummer " + i);
-			// i++;
 		}
-		// System.out.println("schleife Verlassen");
-		// for (double[] c : pointsInCenter.keySet()) {
-		// printDoubleArray(c);
-		// }
-		// for (int h = 0; h<points.size();h++) {
-		// int indexofCenter = 0;
-		// for (int l = 0; l<center.size(); l++) {
-		// try {
-		// if(Arrays.equals(CenterOfPoint.get(points.get(h)), center.get(l))) {
-		// indexofCenter = l;
-		// }
-		// System.out.println("Abstand des Punktes "+h+ " zu Center " + l +" "+
-		// metric.computeDistance(points.get(h), center.get(l)));
-		// } catch (Exception e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// }
-		// System.out.println("Das Center das gewaehlt worden ist "+indexofCenter);
-		// System.out.println("----------------------------------------------------------------------------");
-		// }
 		return pointsInCenter;
 	}
 
@@ -97,7 +69,6 @@ public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 					}
 				}
 				CenterOfPoint.put(point, center.get(indexOfMyCenter));
-				// oldCenterOfPoint.put(point, indexOfMyCenter);
 				pointsInCenter.get(center.get(indexOfMyCenter)).add(point);
 			}
 		} catch (Exception e) {
@@ -127,8 +98,6 @@ public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 					hasSomethingChanged = true;
 					CenterOfPoint.replace(point, center.get(indexOfMyCenter));
 				}
-
-				// oldCenterOfPoint.replace(point, indexOfMyCenter);
 				pointsInCenter.get(center.get(indexOfMyCenter)).add(point);
 			}
 		} catch (Exception e) {
@@ -205,15 +174,4 @@ public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 	public ArrayList<double[]> getCenter(){
 		return center;
 	}
-//	private void printDoubleArray(double[] d) {
-//		for (int i = 0; i < d.length; i++) {
-//			System.out.print("|" + d[i] + "|");
-//			if (d[i] > 1 || d[i] < (-1)) {
-//				System.out.print("---------------PROBLEM-------------------");
-//			}
-//		}
-//		System.out.println(" ");
-//	}
-
-
 }
