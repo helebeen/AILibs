@@ -27,8 +27,6 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	private int numberOfClassifier=21;
 	private ArrayList<String> allClassifier = new ArrayList<String>();
 
-
-
 	private ArrayList<ProblemInstance<Instance>> collectedInstances = new ArrayList<ProblemInstance<Instance>>();
 	private static ArrayList<String> AtributesofTrainingsdata = new ArrayList<String>();
 
@@ -51,33 +49,14 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	public ArrayList<String> getAllClassifier() {
 		return allClassifier;
 	}
-	/** This constructor is used if a own file is used to extracted the training instances
-	 * The Instances has to only contain the metafeatures
-	 * @param filename
-	 * @throws Exception
-	 */
-	public ModifiedISACInstanceCollector(String filename) throws Exception {
-		DataSource customsource = new DataSource(filename);
-		Instances customdata = customsource.getDataSet();
-		for (Instance i : customdata) {
-			collectedInstances.add(new ProblemInstance<Instance>(i));
-		}
-	}
-
-	/** This constructor is used if the default file should be used. Parts of the Instances
-	 * have to be removed for the further computation. (The dataset-ID, Classifers with performance )
-	 * @throws Exception
-	 */
-	public ModifiedISACInstanceCollector() throws Exception {
-		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("metaData_smallDataSets_computed.arff");
-		DataSource source = new DataSource(inputStream);
-		Instances data = source.getDataSet();
+	
+	public ModifiedISACInstanceCollector(Instances data, int startOfClassifierPerformanceValues, int endOfClassifierPerformanceValues) {
 		
 		collectedClassifierandPerformance = new ArrayList<ArrayList<Tuple<Solution<String>,Performance<Double>>>>();
 		
 		for(Instance i : data) {
 			ArrayList<Tuple<Solution<String>,Performance<Double>>> pandc = new ArrayList<Tuple<Solution<String>,Performance<Double>>>();	
-			for(int j = i.numAttributes()-1; j>104; j--) {
+			for(int j = endOfClassifierPerformanceValues; j>=startOfClassifierPerformanceValues; j--) {
 				Solution<String> classi = new Solution<String>(i.attribute(j).name());
 				Performance<Double> perfo = new Performance<Double>(i.value(j));
 				Tuple<Solution<String>, Performance<Double>> tup = new Tuple<Solution<String>,Performance<Double>>(classi,perfo);
@@ -87,20 +66,20 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		}
 		
 		Instance inst = data.get(0);
-		for(int i = inst.numAttributes()-1;i>104;i--) {
+		for(int i = endOfClassifierPerformanceValues;i>=startOfClassifierPerformanceValues;i--) {
 			allClassifier.add(inst.attribute(i).name());
 		}
 		for(String solu :allClassifier) {
 			System.out.println(solu);
 		}
-		for(int i = 0; i<data.numInstances();i++) {
-			for(int j = data.numAttributes()-1; j>=103;j--) {
-				data.get(i);
-			}
-		}
+//		for(int i = 0; i<data.numInstances();i++) {
+//			for(int j = data.numAttributes()-1; j>=103;j--) {
+//				data.get(i);
+//			}
+//		}
 		
 		data.deleteAttributeAt(0);
-		for (int j = data.numAttributes() - 1; j >= 103; j--) {
+		for (int j = endOfClassifierPerformanceValues; j >= startOfClassifierPerformanceValues; j--) {
 			data.deleteAttributeAt(j);
 		}
 		for(int i = 0; i<data.numAttributes();i++) {
@@ -109,6 +88,21 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		for (Instance i : data) {
 			collectedInstances.add(new ProblemInstance<Instance>(i));
 		}
+	}
+	
+	private static Instances loadDefaultInstances() throws Exception {
+		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("metaData_smallDataSets_computed.arff");
+		DataSource source = new DataSource(inputStream);
+		Instances data = source.getDataSet();
+		return data;
+	}
+
+	/** This constructor is used if the default file should be used. Parts of the Instances
+	 * have to be removed for the further computation. (The dataset-ID, Classifers with performance )
+	 * @throws Exception
+	 */
+	public ModifiedISACInstanceCollector() throws Exception {		
+		this(loadDefaultInstances(), 104, 125);
 	}
 	public void setNumberOfClassifier(int number) {
 		this.numberOfClassifier = number;
