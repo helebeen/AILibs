@@ -24,7 +24,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	 */
 	private ArrayList<ArrayList<Tuple<Solution<String>,Performance<Double>>>> collectedClassifierandPerformance;
 	
-	private int numberOfClassifier=21;
+	private int numberOfClassifier;
 	private ArrayList<String> allClassifier = new ArrayList<String>();
 
 	private ArrayList<ProblemInstance<Instance>> collectedInstances = new ArrayList<ProblemInstance<Instance>>();
@@ -53,7 +53,9 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	public ModifiedISACInstanceCollector(Instances data, int startOfClassifierPerformanceValues, int endOfClassifierPerformanceValues) {
 		
 		collectedClassifierandPerformance = new ArrayList<ArrayList<Tuple<Solution<String>,Performance<Double>>>>();
-		
+		//TODO änder das 
+		numberOfClassifier = (((endOfClassifierPerformanceValues+1)-(startOfClassifierPerformanceValues+1))+1);
+	
 		for(Instance i : data) {
 			ArrayList<Tuple<Solution<String>,Performance<Double>>> pandc = new ArrayList<Tuple<Solution<String>,Performance<Double>>>();	
 			for(int j = endOfClassifierPerformanceValues; j>=startOfClassifierPerformanceValues; j--) {
@@ -69,19 +71,21 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		for(int i = endOfClassifierPerformanceValues;i>=startOfClassifierPerformanceValues;i--) {
 			allClassifier.add(inst.attribute(i).name());
 		}
-		for(String solu :allClassifier) {
-			System.out.println(solu);
-		}
-//		for(int i = 0; i<data.numInstances();i++) {
-//			for(int j = data.numAttributes()-1; j>=103;j--) {
-//				data.get(i);
-//			}
-//		}
 		
-		data.deleteAttributeAt(0);
+//		for(String solu :allClassifier) {
+//			System.out.println(solu);
+//		}
+		for(int i = 0; i<data.numInstances();i++) {
+			for(int j = data.numAttributes()-1; j>=103;j--) {
+				data.get(i);
+			}
+		}
+		
+		
 		for (int j = endOfClassifierPerformanceValues; j >= startOfClassifierPerformanceValues; j--) {
 			data.deleteAttributeAt(j);
 		}
+		data.deleteAttributeAt(0);
 		for(int i = 0; i<data.numAttributes();i++) {
 			AtributesofTrainingsdata.add(data.attribute(i).toString());			
 		}

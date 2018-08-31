@@ -49,7 +49,9 @@ public class Bob {
 		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("metaData_smallDataSets_computed.arff");
 		DataSource source = new DataSource(inputStream);
 		Instances data = source.getDataSet();
-		modifiedISACEvaluator.evaluateModifiedISACLeaveOneOut(data);
+//		normalRun();
+		double[] d = modifiedISACEvaluator.evaluateModifiedISACLeaveOneOut(data);
+		printDoubleArray(d);
 	}
 
 }
