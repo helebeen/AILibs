@@ -4,14 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
-
 import jaicore.CustomDataTypes.RankingForGroup;
 import jaicore.CustomDataTypes.Solution;
 import jaicore.modifiedISAC.ModifiedISAC;
 import jaicore.modifiedISAC.ModifiedISACInstanceCollector;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -43,8 +39,9 @@ public class modifiedISACEvaluator {
 			HashMap<String, Integer> positionInRanking = new HashMap<String, Integer>();
 			Instances trainingData = new Instances(data);
 			Instances testprep = new Instances(data);
-			Instance reminder = testprep.get(0);
-			Instance testInstance = trainingData.get(i);
+			Instances tester = new Instances(data);
+			Instance reminder = tester.get(0);
+			
 			trainingData.delete(i);
 
 			ModifiedISACInstanceCollector collect = new ModifiedISACInstanceCollector(trainingData, 104, 125);
@@ -148,15 +145,20 @@ public class modifiedISACEvaluator {
 			for(String str: positionInRanking.keySet()) {
 				test.put(positionInRanking.get(str),str);
 			}
-			ArrayList<Double> difference1 = new ArrayList<Double>();
-			ArrayList<Double> difference2 = new ArrayList<Double>();
+//			ArrayList<Double> difference1 = new ArrayList<Double>();
+//			ArrayList<Double> difference2 = new ArrayList<Double>();
+			double[] difference1 = new double[size];
+			double[] difference2 = new double[size];
+			ArrayList<String> top3truth = new ArrayList<String>();
+			ArrayList<String> top3my = new ArrayList<String>();
 			for(int h = 0; h<size;h++) {
 				String classitruth = test.get(new Integer((int)rankingtruth[h]));
+				top3truth.add(classitruth);
 				String mytruth = test.get(new Integer((int)myranking[h]));
+				top3my.add(mytruth);
 				double perfotruth = 0;
-				double perfomy = 0;				
-				for(int t = reminder.numAttributes()-1; t>=104;t--) {
-					System.out.println(reminder.attribute(t));
+				double perfomy = 0;		
+				for(int t = 125; t>=104;t--) {
 					if(reminder.attribute(t).name().equals(classitruth)) {
 						perfotruth = reminder.value(t);
 					}
@@ -165,19 +167,26 @@ public class modifiedISACEvaluator {
 						perfomy = reminder.value(t);
 					}
 				}
-				difference1.add(perfotruth);
-				difference2.add(perfomy);
+				difference1[h] = perfotruth;
+				difference2[h] = perfomy;
 			}
-			System.out.println(difference1.toString());
-			double maxPerfo = Double.MAX_VALUE;
-			for(int h = 0; h<difference2.size();h++) {
-				
-				if(difference2.get(h)>= maxPerfo) {
-					maxPerfo = difference2.get(h);
-				}
-			}
-			System.out.println("Der Verlust"+(difference1.get(0)-maxPerfo));
-			System.out.println(positionInRanking.toString());
+			Arrays.sort(difference2);
+			System.out.println("Das betrachtete Datenset: "+(i+1));
+			System.out.print("Der Verlust zweichen Platz eins der optimal Lösung und der besten meiner Lösungen: ");
+			System.out.println((Math.rint((1000.0 *(difference1[0]-difference2[size-1]))))/1000.0);
+//				difference1.add(perfotruth);
+//				difference2.add(perfomy);
+//			}
+//			double maxPerfo = Double.MIN_VALUE;
+//			for(int h = 0; h<difference2.size();h++) {
+//				if(difference2.get(h)>= maxPerfo) {
+//					maxPerfo = difference2.get(h);
+//				}
+//			}
+//			System.out.println("Der Verlust "+(difference1.get(0)-maxPerfo));
+			//System.out.println(positionInRanking.toString());
+			System.out.println("Das wahre ranking: "+top3truth.toString());
+			System.out.println("Mein ranking: "+top3my.toString());
 			System.out.println(Arrays.toString(rankingtruth));
 			System.out.println(Arrays.toString(myranking));
 			System.out.println(" ");
