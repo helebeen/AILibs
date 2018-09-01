@@ -174,6 +174,8 @@ public class modifiedISACEvaluator {
 			System.out.println("Das betrachtete Datenset: "+(i+1));
 			System.out.print("Der Verlust zweichen Platz eins der optimal Lösung und der besten meiner Lösungen: ");
 			System.out.println((Math.rint((1000.0 *(difference1[0]-difference2[size-1]))))/1000.0);
+			System.out.print("Der Verlust gegen meine schlecteste Lösung in den top 3: ");
+			System.out.println((Math.rint((1000.0 *(difference1[0]-difference2[0]))))/1000.0);
 //				difference1.add(perfotruth);
 //				difference2.add(perfomy);
 //			}
@@ -185,15 +187,15 @@ public class modifiedISACEvaluator {
 //			}
 //			System.out.println("Der Verlust "+(difference1.get(0)-maxPerfo));
 			//System.out.println(positionInRanking.toString());
+			System.out.println("Bester in der optimalen Lösung "+difference1[0]);
+			System.out.println("Der beste meiner top3 "+difference2[0]);
 			System.out.println("Das wahre ranking: "+top3truth.toString());
 			System.out.println("Mein ranking: "+top3my.toString());
 			System.out.println(Arrays.toString(rankingtruth));
 			System.out.println(Arrays.toString(myranking));
 			System.out.println(" ");
 			results[i] = 4;
-			//System.out.println("Durchlauf nummer "+i);
-			
-			
+			//System.out.println("Durchlauf nummer "+i);		
 		}
 		return results;
 	}
