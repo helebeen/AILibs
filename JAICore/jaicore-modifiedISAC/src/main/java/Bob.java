@@ -1,6 +1,8 @@
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import jaicore.CustomDataTypes.Solution;
 import jaicore.modifiedISAC.ClassifierRankingForGroup;
@@ -51,7 +53,13 @@ public class Bob {
 		Instances data = source.getDataSet();
 //		normalRun();
 		double[] d = modifiedISACEvaluator.evaluateModifiedISACLeaveOneOut(data);
-		printDoubleArray(d);
+		double tmp = Arrays.stream(d).filter(x -> x != Double.NaN).average().getAsDouble();
+		System.out.println(tmp);
+		System.out.println(Arrays.stream(d).max().getAsDouble());
+		System.out.println(Arrays.stream(d).min().getAsDouble());
+		System.out.println(Arrays.stream(d).filter(x ->  { return x > 0.0; }).mapToObj(x -> { return Double.valueOf(x);}).collect(Collectors.toList()));
+		System.out.println(Arrays.toString(d));
+		//printDoubleArray(d);
 	}
 
 }

@@ -10,6 +10,7 @@ import jaicore.CustomDataTypes.RankingForGroup;
 import jaicore.CustomDataTypes.Solution;
 import jaicore.modifiedISAC.ModifiedISAC;
 import jaicore.modifiedISAC.ModifiedISACInstanceCollector;
+import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -42,6 +43,7 @@ public class modifiedISACEvaluator {
 			HashMap<String, Integer> positionInRanking = new HashMap<String, Integer>();
 			Instances trainingData = new Instances(data);
 			Instances testprep = new Instances(data);
+			Instance reminder = testprep.get(0);
 			Instance testInstance = trainingData.get(i);
 			trainingData.delete(i);
 
@@ -60,6 +62,9 @@ public class modifiedISACEvaluator {
 
 			double[] rankingTruth = new double[22];
 			int tmp = 0;
+			
+			
+			
 			while (!ClassandPerfo.isEmpty()) {
 //				System.out.println("size left " + ClassandPerfo.size());
 				double maxPerfo = 0;
@@ -94,24 +99,24 @@ public class modifiedISACEvaluator {
 			}
 			
 			
-			HashMap<String,Double> loopoverall = (HashMap<String, Double>) overall.clone();
-			double finishedoverallranking[] = new double[22];
-			HashMap<String,Integer> rankingoverall = new HashMap<String,Integer>();
-			int loopcounter = 0;
-			while(!loopoverall.isEmpty()) {
-				double maxPerfo = 0;
-				String myClassifier = "";
-				for(String calssi: loopoverall.keySet()) {
-					if(loopoverall.get(calssi)>=maxPerfo) {
-						maxPerfo = loopoverall.get(calssi);
-						myClassifier = calssi;
-					}
-				}
-				finishedoverallranking[loopcounter] = loopcounter;
-				rankingoverall.put(myClassifier, loopcounter);
-				loopoverall.remove(myClassifier);
-				loopcounter++;
-			}
+//			HashMap<String,Double> loopoverall = (HashMap<String, Double>) overall.clone();
+//			double finishedoverallranking[] = new double[22];
+//			HashMap<String,Integer> rankingoverall = new HashMap<String,Integer>();
+//			int loopcounter = 0;
+//			while(!loopoverall.isEmpty()) {
+//				double maxPerfo = 0;
+//				String myClassifier = "";
+//				for(String calssi: loopoverall.keySet()) {
+//					if(loopoverall.get(calssi)>=maxPerfo) {
+//						maxPerfo = loopoverall.get(calssi);
+//						myClassifier = calssi;
+//					}
+//				}
+//				finishedoverallranking[loopcounter] = loopcounter;
+//				rankingoverall.put(myClassifier, loopcounter);
+//				loopoverall.remove(myClassifier);
+//				loopcounter++;
+//			}
 			
 			// get the ranking as string list
 			ArrayList<String> rankingAsStringList = new ArrayList<String>();
@@ -121,26 +126,62 @@ public class modifiedISACEvaluator {
 			double[] rankingFromMyMethod = new double[22];
 			int intermidiate = 0;
 			for (String classi : rankingAsStringList) {
-				//rankingFromMyMethod[intermidiate] = positionInRanking.get(classi);
-				rankingFromMyMethod[intermidiate] = rankingoverall.get(classi);
+				rankingFromMyMethod[intermidiate] = positionInRanking.get(classi);
+//				rankingFromMyMethod[intermidiate] = rankingoverall.get(classi);
 				intermidiate++;
 			}
-//			double[] rankingtruth = new double[3];
-//			double[] myranking = new double[3];
-//			for(int z = 0; z<3;z++) {
-//				rankingtruth[z] = rankingTruth[z];
-//				myranking[z] = rankingFromMyMethod[z];
-//			}
 //			
-		
-			KendallsCorrelation test = new KendallsCorrelation();
-			//double thisResult = test.correlation(rankingtruth, myranking);
-			//double thisResult = test.correlation(rankingTruth, rankingFromMyMethod);
-			double thisResult = test.correlation(finishedoverallranking, rankingFromMyMethod);
+			int size = 3;
+			double[] rankingtruth = new double[size];
+			double[] myranking = new double[size];
+			for(int u = 0; u < size; u++) {
+				rankingtruth[u] = rankingTruth[u];
+				myranking[u] = (rankingFromMyMethod.length-1)-rankingFromMyMethod[u];
+			}
+//			KendallsCorrelation test = new KendallsCorrelation();
+//			double thisResult = test.correlation(rankingtruth, myranking);
+//			double thisResult = test.correlation(rankingTruth, rankingFromMyMethod);
+//			double thisResult = test.correlation(finishedoverallranking, rankingFromMyMethod);
 			
 			// double value as result of this evaluation
-
-			results[i] = thisResult;
+			HashMap<Integer,String> test = new HashMap<Integer,String>();
+			for(String str: positionInRanking.keySet()) {
+				test.put(positionInRanking.get(str),str);
+			}
+			ArrayList<Double> difference1 = new ArrayList<Double>();
+			ArrayList<Double> difference2 = new ArrayList<Double>();
+			for(int h = 0; h<size;h++) {
+				String classitruth = test.get(new Integer((int)rankingtruth[h]));
+				String mytruth = test.get(new Integer((int)myranking[h]));
+				double perfotruth = 0;
+				double perfomy = 0;				
+				for(int t = reminder.numAttributes()-1; t>=104;t--) {
+					System.out.println(reminder.attribute(t));
+					if(reminder.attribute(t).name().equals(classitruth)) {
+						perfotruth = reminder.value(t);
+					}
+					
+					if(reminder.attribute(t).name().equals(mytruth)) {
+						perfomy = reminder.value(t);
+					}
+				}
+				difference1.add(perfotruth);
+				difference2.add(perfomy);
+			}
+			System.out.println(difference1.toString());
+			double maxPerfo = Double.MAX_VALUE;
+			for(int h = 0; h<difference2.size();h++) {
+				
+				if(difference2.get(h)>= maxPerfo) {
+					maxPerfo = difference2.get(h);
+				}
+			}
+			System.out.println("Der Verlust"+(difference1.get(0)-maxPerfo));
+			System.out.println(positionInRanking.toString());
+			System.out.println(Arrays.toString(rankingtruth));
+			System.out.println(Arrays.toString(myranking));
+			System.out.println(" ");
+			results[i] = 4;
 			//System.out.println("Durchlauf nummer "+i);
 			
 			
