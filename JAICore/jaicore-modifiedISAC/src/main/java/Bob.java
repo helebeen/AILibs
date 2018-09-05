@@ -54,11 +54,14 @@ public class Bob {
 //		normalRun();
 		double[] d = modifiedISACEvaluator.evaluateModifiedISACLeaveOneOut(data);
 		double tmp = Arrays.stream(d).filter(x -> x != Double.NaN).average().getAsDouble();
-		System.out.println(tmp);
-		System.out.println(Arrays.stream(d).max().getAsDouble());
-		System.out.println(Arrays.stream(d).min().getAsDouble());
-		System.out.println(Arrays.stream(d).filter(x ->  { return x > 0.0; }).mapToObj(x -> { return Double.valueOf(x);}).collect(Collectors.toList()));
+		System.out.println("Average correlation: "+tmp);
+		System.out.println("Max Kendall correlation "+Arrays.stream(d).max().getAsDouble());
+		System.out.println("Min Kendall correlation "+Arrays.stream(d).min().getAsDouble());
+		System.out.println("The correlations that are greater than 0 "+Arrays.stream(d).filter(x ->  { return x > 0.0; }).mapToObj(x -> { return Double.valueOf(x);}).collect(Collectors.toList()));
+		System.out.println(" ");
 		System.out.println(Arrays.toString(d));
+		System.out.println("My first place vs. opt first place in acc "+Arrays.toString(modifiedISACEvaluator.getPlatz1my()));
+		System.out.println("The overall first place vs. opt first place in acc "+Arrays.toString(modifiedISACEvaluator.getPlatz1overall()));
 		//printDoubleArray(d);
 	}
 

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+
 import jaicore.CustomDataTypes.RankingForGroup;
 import jaicore.CustomDataTypes.Solution;
 import jaicore.modifiedISAC.ModifiedISAC;
@@ -12,29 +14,18 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class modifiedISACEvaluator {
+	private static double [] platz1my;
+	private static double [] platz1overall;
+	public static double[] getPlatz1my() {
+		return platz1my;
+	}
+	public static double[] getPlatz1overall() {
+		return platz1overall;
+	}
 	public static double[] evaluateModifiedISACLeaveOneOut(Instances data) {
 		double[] results = new double[data.numInstances()];
-		double[] overallranking = new double[22];
-		int[] totalvalue = new int[22];
-
-		for(Instance i : data) {
-			int tmp = 0;
-			for(int l = i.numAttributes()-1; l >= 104;l--) {
-				if(!Double.isNaN(i.value(l))){
-					overallranking[tmp]= i.value(l);
-					totalvalue[tmp]++;
-				}	
-				tmp++;
-			}
-		}
-		for(int i = 0; i<overallranking.length;i++) {
-			overallranking[i] = overallranking[i]/totalvalue[i];
-		}
-		HashMap<String,Double> overall = new HashMap<String,Double>();
-		for(int i = 0; i<overallranking.length;i++) {
-			overall.put(data.get(0).attribute(data.numAttributes()-1-i).name(),overallranking[i]);
-		}
-
+		platz1my = new double[data.numInstances()];
+		platz1overall= new double[data.numInstances()];
 		for (int i = 0; i < data.numInstances(); i++) {
 			HashMap<String, Integer> positionInRanking = new HashMap<String, Integer>();
 			Instances trainingData = new Instances(data);
@@ -43,7 +34,30 @@ public class modifiedISACEvaluator {
 			Instance reminder = tester.get(i);
 			
 			trainingData.delete(i);
+			double[] overallranking = new double[22];
+			int[] totalvalue = new int[22];
 
+			for(Instance inst : trainingData) {
+				int tmp = 0;
+				for(int l = inst.numAttributes()-1; l >= 104;l--) {
+					if(!Double.isNaN(inst.value(l))){
+						overallranking[tmp]+= inst.value(l);
+						totalvalue[tmp]++;
+					}	
+					tmp++;
+				}
+			}
+			for(int o = 0; o<overallranking.length;o++) {
+				overallranking[o] = overallranking[o]/totalvalue[o];
+			}
+			HashMap<String,Double> overall = new HashMap<String,Double>();
+			int exampel = 0;
+			if(i == 0) {
+				exampel = 1;
+			}
+			for(int p = 0; p<overallranking.length;p++) {
+				overall.put(data.get(exampel).attribute((data.numAttributes()-1)-p).name(),overallranking[p]);
+			}
 			ModifiedISACInstanceCollector collect = new ModifiedISACInstanceCollector(trainingData, 104, 125);
 			ModifiedISAC isac = new ModifiedISAC(collect, null);
 			isac.bulidRanker();
@@ -94,26 +108,29 @@ public class modifiedISACEvaluator {
 				}
 				
 			}
-			
-			
-//			HashMap<String,Double> loopoverall = (HashMap<String, Double>) overall.clone();
-//			double finishedoverallranking[] = new double[22];
-//			HashMap<String,Integer> rankingoverall = new HashMap<String,Integer>();
-//			int loopcounter = 0;
-//			while(!loopoverall.isEmpty()) {
-//				double maxPerfo = 0;
-//				String myClassifier = "";
-//				for(String calssi: loopoverall.keySet()) {
-//					if(loopoverall.get(calssi)>=maxPerfo) {
-//						maxPerfo = loopoverall.get(calssi);
-//						myClassifier = calssi;
-//					}
-//				}
-//				finishedoverallranking[loopcounter] = loopcounter;
-//				rankingoverall.put(myClassifier, loopcounter);
-//				loopoverall.remove(myClassifier);
-//				loopcounter++;
-//			}
+			int size = 3;
+			double[] difference3 = new double[size];
+			HashMap<String,Double> loopoverall = (HashMap<String, Double>) overall.clone();
+			double finishedoverallranking[] = new double[22];
+			HashMap<String,Integer> rankingoverall = new HashMap<String,Integer>();
+			int loopcounter = 0;
+			while(!loopoverall.isEmpty()) {
+				double maxPerfo = Double.MIN_VALUE;
+				String myClassifier = "";
+				for(String calssi: loopoverall.keySet()) {
+					if(loopoverall.get(calssi)>=maxPerfo) {
+						maxPerfo = loopoverall.get(calssi);
+						myClassifier = calssi;
+					}
+				}
+				if(loopcounter<size) {
+					difference3[loopcounter]=maxPerfo;
+				}
+				finishedoverallranking[loopcounter] = positionInRanking.get(myClassifier);
+				rankingoverall.put(myClassifier, loopcounter);
+				loopoverall.remove(myClassifier);
+				loopcounter++;
+			}
 			
 			// get the ranking as string list
 			ArrayList<String> rankingAsStringList = new ArrayList<String>();
@@ -128,13 +145,16 @@ public class modifiedISACEvaluator {
 				intermidiate++;
 			}
 //			
-			int size = 3;
+			
 			double[] rankingtruth = new double[size];
 			double[] myranking = new double[size];
 			for(int u = 0; u < size; u++) {
 				rankingtruth[u] = rankingTruth[u];
 				myranking[u] = (rankingFromMyMethod.length-1)-rankingFromMyMethod[u];
 //				myranking[u] = rankingFromMyMethod[u];
+			}
+			for(int t = 0; t< rankingFromMyMethod.length; t++) {
+				rankingFromMyMethod[t]= (rankingFromMyMethod.length-1)-rankingFromMyMethod[t];
 			}
 //			KendallsCorrelation test = new KendallsCorrelation();
 //			double thisResult = test.correlation(rankingtruth, myranking);
@@ -190,15 +210,21 @@ public class modifiedISACEvaluator {
 			System.out.println("Bester in der optimalen Lösung: "+difference1[0]);
 			System.out.println("Mein Platz eins:  "+difference2[0]);
 			double platz1 = difference2[0];
+			platz1my[i] = difference1[0]-platz1;
+			System.out.println(difference3[0]);
+			platz1overall[i] = difference1[0]-difference3[0];
 			System.out.println("Das wahre ranking: "+top3truth.toString());
 			System.out.println("Mein ranking: "+top3my.toString());
 			Arrays.sort(difference2);
 			System.out.println("Beste Performance "+difference2[size-1]);
+			
 			System.out.println("Ist die beste Performance Plazt 1? "+(platz1 == difference2[size-1]));
 			System.out.println(Arrays.toString(rankingtruth));
 			System.out.println(Arrays.toString(myranking));
 			System.out.println(" ");
-			results[i] = 4;
+			KendallsCorrelation correl = new KendallsCorrelation();
+			results[i] = correl.correlation(rankingTruth, rankingFromMyMethod);
+			
 			//System.out.println("Durchlauf nummer "+i);		
 		}
 		return results;
