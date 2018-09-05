@@ -40,7 +40,7 @@ public class modifiedISACEvaluator {
 			Instances trainingData = new Instances(data);
 			Instances testprep = new Instances(data);
 			Instances tester = new Instances(data);
-			Instance reminder = tester.get(0);
+			Instance reminder = tester.get(i);
 			
 			trainingData.delete(i);
 
@@ -50,6 +50,8 @@ public class modifiedISACEvaluator {
 			HashMap<String, Double> ClassandPerfo = new HashMap<String, Double>();
 			for (int p = testprep.numAttributes() - 1; p >= 104; p--) {
 				ClassandPerfo.put(testprep.get(i).attribute(p).name(), testprep.get(i).value(p));
+//				System.out.print("Das ist der Classifier "+ testprep.get(i).attribute(p).name());
+//				System.out.println(" Performance "+testprep.get(i).value(p));
 				testprep.deleteAttributeAt(p);
 			}
 			testprep.deleteAttributeAt(0);
@@ -58,13 +60,10 @@ public class modifiedISACEvaluator {
 			// get the ground truth ranking as string list
 
 			double[] rankingTruth = new double[22];
-			int tmp = 0;
-			
-			
-			
+			int tmp = 0;	
 			while (!ClassandPerfo.isEmpty()) {
 //				System.out.println("size left " + ClassandPerfo.size());
-				double maxPerfo = 0;
+				double maxPerfo = Double.MIN_VALUE;
 				String myClassi = "";
 				for (String classi : ClassandPerfo.keySet()) {
 					if (!ClassandPerfo.get(classi).isNaN()) {
@@ -74,6 +73,7 @@ public class modifiedISACEvaluator {
 							myClassi = classi;
 						}
 					}
+					
 				}
 //				System.out.println("myClassi is null " + myClassi == null);
 				if (myClassi.isEmpty()) {
@@ -134,6 +134,7 @@ public class modifiedISACEvaluator {
 			for(int u = 0; u < size; u++) {
 				rankingtruth[u] = rankingTruth[u];
 				myranking[u] = (rankingFromMyMethod.length-1)-rankingFromMyMethod[u];
+//				myranking[u] = rankingFromMyMethod[u];
 			}
 //			KendallsCorrelation test = new KendallsCorrelation();
 //			double thisResult = test.correlation(rankingtruth, myranking);
@@ -162,7 +163,6 @@ public class modifiedISACEvaluator {
 					if(reminder.attribute(t).name().equals(classitruth)) {
 						perfotruth = reminder.value(t);
 					}
-					
 					if(reminder.attribute(t).name().equals(mytruth)) {
 						perfomy = reminder.value(t);
 					}
@@ -170,12 +170,12 @@ public class modifiedISACEvaluator {
 				difference1[h] = perfotruth;
 				difference2[h] = perfomy;
 			}
-			Arrays.sort(difference2);
 			System.out.println("Das betrachtete Datenset: "+(i+1));
 			System.out.print("Der Verlust zweichen Platz eins der optimal Lösung und der besten meiner Lösungen: ");
-			System.out.println((Math.rint((1000.0 *(difference1[0]-difference2[size-1]))))/1000.0);
-			System.out.print("Der Verlust gegen meine schlecteste Lösung in den top 3: ");
 			System.out.println((Math.rint((1000.0 *(difference1[0]-difference2[0]))))/1000.0);
+			System.out.println("Mein Platz 3: "+difference2[size-1]);
+			System.out.print("Der Verlust gegen meinen Platz 3: ");
+			System.out.println((Math.rint((1000.0 *(difference1[0]-difference2[size-1]))))/1000.0);
 //				difference1.add(perfotruth);
 //				difference2.add(perfomy);
 //			}
@@ -187,10 +187,14 @@ public class modifiedISACEvaluator {
 //			}
 //			System.out.println("Der Verlust "+(difference1.get(0)-maxPerfo));
 			//System.out.println(positionInRanking.toString());
-			System.out.println("Bester in der optimalen Lösung "+difference1[0]);
-			System.out.println("Der beste meiner top3 "+difference2[0]);
+			System.out.println("Bester in der optimalen Lösung: "+difference1[0]);
+			System.out.println("Mein Platz eins:  "+difference2[0]);
+			double platz1 = difference2[0];
 			System.out.println("Das wahre ranking: "+top3truth.toString());
 			System.out.println("Mein ranking: "+top3my.toString());
+			Arrays.sort(difference2);
+			System.out.println("Beste Performance "+difference2[size-1]);
+			System.out.println("Ist die beste Performance Plazt 1? "+(platz1 == difference2[size-1]));
 			System.out.println(Arrays.toString(rankingtruth));
 			System.out.println(Arrays.toString(myranking));
 			System.out.println(" ");

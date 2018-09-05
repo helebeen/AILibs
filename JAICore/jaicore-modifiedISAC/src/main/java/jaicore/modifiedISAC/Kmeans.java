@@ -3,6 +3,12 @@ package jaicore.modifiedISAC;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * @author Helen
+ *
+ * @param <A> The to cluster points 
+ * @param <D> The Type of the distance measure.
+ */
 abstract public class Kmeans<A,D> {
 	public ArrayList<A> points;
 	public ArrayList<A> center;

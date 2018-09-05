@@ -70,21 +70,9 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		Instance inst = data.get(0);
 		for(int i = endOfClassifierPerformanceValues;i>=startOfClassifierPerformanceValues;i--) {
 			allClassifier.add(inst.attribute(i).name());
+			data.deleteAttributeAt(i);
 		}
-		
-//		for(String solu :allClassifier) {
-//			System.out.println(solu);
-//		}
-		for(int i = 0; i<data.numInstances();i++) {
-			for(int j = data.numAttributes()-1; j>=103;j--) {
-				data.get(i);
-			}
-		}
-		
-		
-		for (int j = endOfClassifierPerformanceValues; j >= startOfClassifierPerformanceValues; j--) {
-			data.deleteAttributeAt(j);
-		}
+
 		data.deleteAttributeAt(0);
 		for(int i = 0; i<data.numAttributes();i++) {
 			AtributesofTrainingsdata.add(data.attribute(i).toString());			
