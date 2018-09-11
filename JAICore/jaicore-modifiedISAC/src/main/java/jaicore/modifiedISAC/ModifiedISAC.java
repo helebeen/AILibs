@@ -111,40 +111,17 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String, D
 				remainingCandidiates.put(allClassifier.get(i), clusterMean[i]);
 			}
 
-//			while (!remainingCandidiates.isEmpty()) {
-//				//double max = Double.MAX_VALUE;
-//				double min = Double.MIN_VALUE;
-//				String classi = null;
-//				for (String str : remainingCandidiates.keySet()) {
-//					double candidate = remainingCandidiates.get(str);
-//					//if (candidate <= max) {
-//					if(candidate> min) {
-//						classi = str;
-//						//max = candidate;
-//						min = candidate;
-//					}
-//				}
-//				if(classi == null) {
-//					for(String str : remainingCandidiates.keySet()) {
-//						ranking.add(new Solution<String>(str));
-//					}
-//					remainingCandidiates.clear();
-//				}else {
-//					ranking.add(new Solution<String>(classi));
-//					remainingCandidiates.remove(classi);
-//				}
-//
-//			}
-//			
 			while (!remainingCandidiates.isEmpty()) {
-				double max = Double.MAX_VALUE;
+				//double max = Double.MAX_VALUE;
+				double min = Double.MIN_VALUE;
 				String classi = null;
 				for (String str : remainingCandidiates.keySet()) {
 					double candidate = remainingCandidiates.get(str);
-					if (candidate <= max) {
-				
+					//if (candidate <= max) {
+					if(candidate> min) {
 						classi = str;
-						max = candidate;
+						//max = candidate;
+						min = candidate;
 					}
 				}
 				if(classi == null) {
@@ -158,6 +135,29 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String, D
 				}
 
 			}
+			
+//			while (!remainingCandidiates.isEmpty()) {
+//				double max = Double.MAX_VALUE;
+//				String classi = null;
+//				for (String str : remainingCandidiates.keySet()) {
+//					double candidate = remainingCandidiates.get(str);
+//					if (candidate <= max) {
+//				
+//						classi = str;
+//						max = candidate;
+//					}
+//				}
+//				if(classi == null) {
+//					for(String str : remainingCandidiates.keySet()) {
+//						ranking.add(new Solution<String>(str));
+//					}
+//					remainingCandidiates.clear();
+//				}else {
+//					ranking.add(new Solution<String>(classi));
+//					remainingCandidiates.remove(classi);
+//				}
+//
+//			}
 			rankings.add(new ClassifierRankingForGroup(c.getId(), ranking));
 		}
 	}
