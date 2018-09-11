@@ -10,6 +10,7 @@ import jaicore.CustomDataTypes.RankingForGroup;
 import jaicore.CustomDataTypes.Solution;
 import jaicore.modifiedISAC.ModifiedISAC;
 import jaicore.modifiedISAC.ModifiedISACInstanceCollector;
+import java_cup.symbol;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -83,6 +84,7 @@ public class modifiedISACEvaluator {
 			Instance reminder = tester.get(i);
 			
 			trainingData.delete(i);
+			
 			double[] overallranking = new double[22];
 			int[] totalvalue = new int[22];
 
@@ -96,43 +98,44 @@ public class modifiedISACEvaluator {
 					tmp++;
 				}
 			}
+			
 			for(int o = 0; o<overallranking.length;o++) {
 				overallranking[o] = overallranking[o]/totalvalue[o];
 			}
+			
 			HashMap<String,Double> overall = new HashMap<String,Double>();
+			
 			int exampel = 0;
 			if(i == 0) {
 				exampel = 1;
 			}
+			
 			for(int p = 0; p<overallranking.length;p++) {
 				overall.put(data.get(exampel).attribute((data.numAttributes()-1)-p).name(),overallranking[p]);
 			}
 			ModifiedISACInstanceCollector collect = new ModifiedISACInstanceCollector(trainingData, 104, 125);
 			ModifiedISAC isac = new ModifiedISAC(collect, null);
 			isac.bulidRanker();
-//			if(i == 0) {
-//				String print="";
-//				for(String str : collect.getAllClassifier()) {
-//					print += " "+str+", ";
-//					
-//				}
-//				System.out.println(print);
-//			}
+
 			HashMap<String, Double> ClassandPerfo = new HashMap<String, Double>();
 			for (int p = testprep.numAttributes() - 1; p >= 104; p--) {
 				ClassandPerfo.put(testprep.get(i).attribute(p).name(), testprep.get(i).value(p));
-//				System.out.print("Das ist der Classifier "+ testprep.get(i).attribute(p).name());
-//				System.out.println(" Performance "+testprep.get(i).value(p));
 				testprep.deleteAttributeAt(p);
 			}
 			testprep.deleteAttributeAt(0);
 			Instance inst = testprep.get(i);
+			
+			
 			RankingForGroup<double[], String> ranking = isac.getRanking(inst);
 			// get the ground truth ranking as string list
+			
 			int size = 3;
+			
+			
 			double[] rankingTruth = new double[22];
 			int tmp = 0;
 			ArrayList<String> top3truth = new ArrayList<String>();
+			
 			while (!ClassandPerfo.isEmpty()) {
 //				System.out.println("size left " + ClassandPerfo.size());
 				double maxPerfo = Double.MIN_VALUE;
@@ -149,7 +152,6 @@ public class modifiedISACEvaluator {
 				}
 //				System.out.println("myClassi is null " + myClassi == null);
 				if (myClassi.isEmpty()) {
-//					System.out.println("Hallllllllllllllo");
 					int nans = tmp;
 					for (String str : ClassandPerfo.keySet()) {
 						if(nans<size) {
@@ -172,12 +174,16 @@ public class modifiedISACEvaluator {
 				}
 				
 			}
+			
+			System.out.println("Ranking truth "+Arrays.toString(rankingTruth));
 
 			double[] difference3 = new double[size];
+			
 			HashMap<String,Double> loopoverall = (HashMap<String, Double>) overall.clone();
 			double finishedoverallranking[] = new double[22];
 			HashMap<String,Integer> rankingoverall = new HashMap<String,Integer>();
 			int loopcounter = 0;
+			
 			while(!loopoverall.isEmpty()) {
 				double maxPerfo = Double.MIN_VALUE;
 				String myClassifier = "";
@@ -195,7 +201,7 @@ public class modifiedISACEvaluator {
 				loopoverall.remove(myClassifier);
 				loopcounter++;
 			}
-			
+			System.out.println("baseline ranking "+Arrays.toString(finishedoverallranking));
 			// get the ranking as string list
 			ArrayList<String> rankingAsStringList = new ArrayList<String>();
 			for (Solution<String> rank : ranking.getRanking()) {
@@ -212,7 +218,9 @@ public class modifiedISACEvaluator {
 				}
 //				rankingFromMyMethod[intermidiate] = rankingoverall.get(classi);
 				intermidiate++;
+				
 			}
+			System.out.println("My rnaking "+ Arrays.toString(rankingFromMyMethod));
 //			
 			ArrayList<String> top3MlPlan = new ArrayList<String>();
 			ArrayList<String> mlPlanranking = makeStaticRanking();
@@ -234,13 +242,17 @@ public class modifiedISACEvaluator {
 					mlplanranking[index] =intermidiate;
 					intermidiate++;
 				}	
+				
 			}
+			System.out.println("ML-plan ranking "+Arrays.toString(mlplanranking));
 			
 			double[] rankingtruth = new double[size];
 			double[] myranking = new double[size];
 			double[] mlplanr = new double[size];
+			
 			double stpestiloptwouldbereached = 0;
 			double stepstillmlreachopt = 0;
+			
 			for(int u = 0; u < size; u++) {
 				rankingtruth[u] = rankingTruth[u];
 //				myranking[u] = (rankingFromMyMethod.length-1)-rankingFromMyMethod[u];
@@ -249,7 +261,7 @@ public class modifiedISACEvaluator {
 						myranking[u] = k;
 					}
 					if(rankingFromMyMethod[k]==0) {
-						stpestiloptwouldbereached = k;
+						stpestiloptwouldbereached = k+1;
 					}
 				}
 				for(int k = 0; k < mlplanranking.length-1; k++) {
@@ -257,7 +269,7 @@ public class modifiedISACEvaluator {
 						mlplanr[u] = k;
 					}
 					if(mlplanranking[k]==0) {
-						stepstillmlreachopt = k;
+						stepstillmlreachopt = k+1;
 					}
 				}
 				
@@ -346,7 +358,7 @@ public class modifiedISACEvaluator {
 			Arrays.sort(difference2);
 			System.out.println("Beste Performance "+difference2[size-1]);
 			
-			System.out.println("Ist die beste Performance Plazt 1? "+(platz1 == difference2[size-1]));
+			System.out.println("Ist die beste Performance Plazt 1 bei meinem ranking? "+(platz1 == difference2[size-1]));
 			
 			System.out.println(Arrays.toString(rankingtruth));
 			System.out.println(Arrays.toString(myranking));

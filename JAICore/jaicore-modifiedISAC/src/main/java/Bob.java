@@ -94,8 +94,8 @@ public class Bob {
 		System.out.println("my top3 vs opt max difference "+modifiedISACEvaluator.gettop3mymethod()[indexForNan(modifiedISACEvaluator.gettop3mymethod())-1]);
 		Arrays.sort(modifiedISACEvaluator.getTop3overall());
 		System.out.println("overall top3 vs opt max difference "+modifiedISACEvaluator.getTop3overall()[indexForNan(modifiedISACEvaluator.getTop3overall())-1]);
-		Arrays.sort(modifiedISACEvaluator.getTop3overall());
-		System.out.println("Ml top3 vs opt max difference "+modifiedISACEvaluator.getTop3overall()[indexForNan(modifiedISACEvaluator.getTop3ml())-1]);
+		Arrays.sort(modifiedISACEvaluator.getTop3ml());
+		System.out.println("Ml top3 vs opt max difference "+modifiedISACEvaluator.getTop3ml()[indexForNan(modifiedISACEvaluator.getTop3ml())-1]);
 		System.out.println(" ");
 		
 		System.out.println("The avrage of my method vs opt acc difference "+avarge(modifiedISACEvaluator.getPlatz1my()));	
