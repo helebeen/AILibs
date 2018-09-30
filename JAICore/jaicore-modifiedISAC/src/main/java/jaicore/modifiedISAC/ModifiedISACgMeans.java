@@ -133,14 +133,6 @@ public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		System.out.println("Done");
-//		for (double[] d : currentPoints.keySet()) {
-//			System.out.print("Center: ");
-//			printDoubleArray(d);
-//			for (double[] j : currentPoints.get(d)) {
-//				printDoubleArray(j);
-//			}
-//		}
 		return gmeansCluster;
 	}
 

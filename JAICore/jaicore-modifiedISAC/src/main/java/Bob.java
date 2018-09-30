@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.inference.TTest;
 
 import jaicore.CustomDataTypes.Solution;
@@ -77,30 +78,82 @@ public class Bob {
 		Instances data = source.getDataSet();
 //		normalRun();
 		double[] d = modifiedISACEvaluator.evaluateModifiedISACLeaveOneOut(data);
+		System.out.println("-----------------------------------------------");
+		System.out.println(" ");
+		System.out.println("Avarage runtime "+Arrays.stream(modifiedISACEvaluator.getTimes()).average().getAsDouble()+" ms");
+		System.out.println("Random forest in top 3 "+modifiedISACEvaluator.getRandomForestplatz1());
+		System.out.println("Random Forest in avareg in top 3 "+modifiedISACEvaluator.getRandomForestplatz1()/data.numInstances());
+		System.out.println("Avareg place of Random Forest "+ Arrays.stream(modifiedISACEvaluator.getRandomForest()).average().getAsDouble());
+		
+		System.out.println("Naive baise multi in top 3 "+modifiedISACEvaluator.getNaivebaismulti());
+		System.out.println("Naive baise multi in avareg in top 3 "+modifiedISACEvaluator.getNaivebaismulti()/data.numInstances());
+		
+		System.out.println("Naive bais in top 3 "+modifiedISACEvaluator.getNaivebais());
+		System.out.println("Naive bais in avareg in top 3 "+modifiedISACEvaluator.getNaivebais()/data.numInstances());
+		
+		System.out.println(" ");
+		System.out.println("My correlation "+Arrays.toString(d));
+		Variance variance = new Variance();
+		
+		System.out.println("Ml correlation "+Arrays.toString(modifiedISACEvaluator.getKendallforML()));
 		double tmp = Arrays.stream(d).filter(x -> x != Double.NaN).average().getAsDouble();
+		double tmp2 = Arrays.stream(modifiedISACEvaluator.getKendallforML()).filter(x -> x != Double.NaN).average().getAsDouble();
+		System.out.println(" ");
+		System.out.println("The varaince of my method "+ variance.evaluate(d,tmp));
+		System.out.println("The varaince of ML method "+ variance.evaluate(modifiedISACEvaluator.getKendallforML(), tmp2));
+		TTest testkendall = new TTest();
+		double pvalue = testkendall.tTest(modifiedISACEvaluator.getKendallforML(),d);
+		boolean testpast = testkendall.tTest(modifiedISACEvaluator.getKendallforML(),d,0.05); 
+		System.out.println("Kendall correlation significanc test for ML and my method "+pvalue+" test past: "+testpast);
+		System.out.println("");
+		
 		System.out.println("Average correlation: "+tmp);
-		System.out.println("Max Kendall correlation "+Arrays.stream(d).max().getAsDouble());
-		System.out.println("Min Kendall correlation "+Arrays.stream(d).min().getAsDouble());
-		System.out.println("The correlations that are greater than 0 "+Arrays.stream(d).filter(x ->  { return x > 0.0; }).mapToObj(x -> { return Double.valueOf(x);}).collect(Collectors.toList()));
+		System.out.println("Max Kendall correlation my "+Arrays.stream(d).max().getAsDouble());
+		double [] tmpmy = Arrays.copyOfRange(d, 0, d.length);
+		for(int i = 0; i < d.length;i++) {
+			tmpmy[i]=Math.abs(d[i]);
+		}
+		double min = Arrays.stream(tmpmy).min().getAsDouble();
+		System.out.println("Min Kendall correlation my "+min);
+		int indexOfMin = 0;
+		for(int i = 0;i<tmpmy.length;i++) {
+			if(tmpmy[i] == min) {
+				indexOfMin = i;
+			}
+		}
+		System.out.println("Index of minimum "+(indexOfMin+1));
 		System.out.println(" ");
-		System.out.println(Arrays.toString(d));
+		
+		double[] dml = modifiedISACEvaluator.getKendallforML();
+		double tmpml = Arrays.stream(dml).filter(x -> x != Double.NaN).average().getAsDouble();
+		
+		System.out.println("Max Kendall correlation of ML "+Arrays.stream(dml).max().getAsDouble());
+		System.out.println("Average correlation "+tmpml);
+		double [] tmpdml = Arrays.copyOfRange(dml, 0, dml.length);
+		for(int i = 0; i < dml.length;i++) {
+			tmpdml[i]=Math.abs(dml[i]);
+		}
+		System.out.println("Min Kendall correlation of ML "+Arrays.stream(tmpdml).min().getAsDouble());
 		System.out.println(" ");
+		
 		
 		System.out.println("My first place vs. opt first place in acc "+Arrays.toString(modifiedISACEvaluator.getPlatz1my()));
 		System.out.println("The overall first place vs. opt first place in acc "+Arrays.toString(modifiedISACEvaluator.getPlatz1overall()));
 		System.out.println("The ml static ranking vs. opt first place in acc "+Arrays.toString(modifiedISACEvaluator.getPlatz1ml()));
 		System.out.println(" ");
+		
+		
+		System.out.println("The avrage of my method vs opt acc difference "+avarge(modifiedISACEvaluator.getPlatz1my()));	
+		System.out.println("The avrage of the overall vs opt acc difference "+avarge(modifiedISACEvaluator.getPlatz1overall()));
+		System.out.println("The avrage of Ml vs opt acc difference "+avarge(modifiedISACEvaluator.getPlatz1ml()));
+		System.out.println(" ");
+		
 		Arrays.sort(modifiedISACEvaluator.gettop3mymethod());
 		System.out.println("my top3 vs opt max difference "+modifiedISACEvaluator.gettop3mymethod()[indexForNan(modifiedISACEvaluator.gettop3mymethod())-1]);
 		Arrays.sort(modifiedISACEvaluator.getTop3overall());
 		System.out.println("overall top3 vs opt max difference "+modifiedISACEvaluator.getTop3overall()[indexForNan(modifiedISACEvaluator.getTop3overall())-1]);
 		Arrays.sort(modifiedISACEvaluator.getTop3ml());
 		System.out.println("Ml top3 vs opt max difference "+modifiedISACEvaluator.getTop3ml()[indexForNan(modifiedISACEvaluator.getTop3ml())-1]);
-		System.out.println(" ");
-		
-		System.out.println("The avrage of my method vs opt acc difference "+avarge(modifiedISACEvaluator.getPlatz1my()));	
-		System.out.println("The avrage of the overall vs opt acc difference "+avarge(modifiedISACEvaluator.getPlatz1overall()));
-		System.out.println("The avrage of Ml vs opt acc difference "+avarge(modifiedISACEvaluator.getPlatz1ml()));
 		System.out.println(" ");
 		
 		System.out.println("The avarge of the top3 of my mehtod vs opt acc difference " +avarge(modifiedISACEvaluator.gettop3mymethod()));

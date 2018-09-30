@@ -3,7 +3,9 @@ package jaicore.modifiedISAC.evalutation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Timer;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 
 import jaicore.CustomDataTypes.RankingForGroup;
@@ -26,7 +28,31 @@ public class modifiedISACEvaluator {
 	private static double[] untouchedml;
 	private static double[] stepdifference;
 	private static double[] stepdifferenceML;
+	private static double[] kendallforML;
+	private static double[] times;
+	private static double randomForestplatz1;
+	private static double[] randomForest;
+	private static double naivebaismulti;
+	private static double naivebais;
 	
+	public static double getNaivebais() {
+		return naivebais;
+	}
+	public static double getNaivebaismulti() {
+		return naivebaismulti;
+	}
+	public static double[] getRandomForest() {
+		return randomForest;
+	}
+	public static double getRandomForestplatz1() {
+		return randomForestplatz1;
+	}
+	public static double[] getTimes() {
+		return times;
+	}
+	public static double[] getKendallforML() {
+		return kendallforML;
+	}
 	public static double[] getStepdifferenceML() {
 		return stepdifferenceML;
 	}
@@ -75,6 +101,11 @@ public class modifiedISACEvaluator {
 		platz1ml = new double[data.numInstances()];
 		stepdifference = new double[data.numInstances()];
 		stepdifferenceML = new double[data.numInstances()];
+		kendallforML = new double[data.numInstances()];
+		times =  new double[data.numInstances()];
+		randomForest = new double[data.numInstances()];
+		naivebaismulti = 0;
+		naivebais = 0;
 		
 		for (int i = 0; i < data.numInstances(); i++) {
 			HashMap<String, Integer> positionInRanking = new HashMap<String, Integer>();
@@ -113,9 +144,15 @@ public class modifiedISACEvaluator {
 			for(int p = 0; p<overallranking.length;p++) {
 				overall.put(data.get(exampel).attribute((data.numAttributes()-1)-p).name(),overallranking[p]);
 			}
+			StopWatch watch = new StopWatch();
+			watch.start();
 			ModifiedISACInstanceCollector collect = new ModifiedISACInstanceCollector(trainingData, 104, 125);
 			ModifiedISAC isac = new ModifiedISAC(collect, null);
 			isac.bulidRanker();
+			watch.stop();
+			System.out.println(watch.getTime()+" ms");
+			times[i] = watch.getTime();
+			watch.reset();
 
 			HashMap<String, Double> ClassandPerfo = new HashMap<String, Double>();
 			for (int p = testprep.numAttributes() - 1; p >= 104; p--) {
@@ -166,6 +203,15 @@ public class modifiedISACEvaluator {
 //					System.out.println(tmp);
 					if(tmp< size) {
 						top3truth.add(myClassi);
+						if(myClassi.equals("weka.classifiers.trees.RandomForest")) {
+							randomForestplatz1++;
+						}
+						if(myClassi.equals("weka.classifiers.bayes.NaiveBayesMultinomial")) {
+							naivebaismulti++;
+						}
+						if(myClassi.equals("weka.classifiers.bayes.NaiveBayes")) {
+							naivebais++;
+						}
 					}
 					rankingTruth[tmp] = tmp;
 					positionInRanking.put(myClassi, tmp);
@@ -194,7 +240,10 @@ public class modifiedISACEvaluator {
 					}
 				}
 				if(loopcounter<size) {
-					difference3[loopcounter]=maxPerfo;
+					if(maxPerfo != Double.MIN_VALUE) {
+						difference3[loopcounter]=maxPerfo;
+						
+					}
 				}
 				finishedoverallranking[positionInRanking.get(myClassifier)] = loopcounter;
 				rankingoverall.put(myClassifier, loopcounter);
@@ -246,42 +295,11 @@ public class modifiedISACEvaluator {
 			}
 			System.out.println("ML-plan ranking "+Arrays.toString(mlplanranking));
 			
-			double[] rankingtruth = new double[size];
-			double[] myranking = new double[size];
-			double[] mlplanr = new double[size];
-			
 			double stpestiloptwouldbereached = 0;
 			double stepstillmlreachopt = 0;
-			
-			for(int u = 0; u < size; u++) {
-				rankingtruth[u] = rankingTruth[u];
-//				myranking[u] = (rankingFromMyMethod.length-1)-rankingFromMyMethod[u];
-				for(int k = 0; k < rankingFromMyMethod.length-1; k++) {
-					if(rankingFromMyMethod[k] == u) {
-						myranking[u] = k;
-					}
-					if(rankingFromMyMethod[k]==0) {
-						stpestiloptwouldbereached = k+1;
-					}
-				}
-				for(int k = 0; k < mlplanranking.length-1; k++) {
-					if(mlplanranking[k] == u) {
-						mlplanr[u] = k;
-					}
-					if(mlplanranking[k]==0) {
-						stepstillmlreachopt = k+1;
-					}
-				}
-				
-			}
-//			for(int t = 0; t< rankingFromMyMethod.length; t++) {
-//				rankingFromMyMethod[t]= (rankingFromMyMethod.length-1)-rankingFromMyMethod[t];
-//			}
-			
-			// double value as result of this evaluation
-
-
-			
+			stpestiloptwouldbereached = rankingFromMyMethod[0]+1;
+			stepstillmlreachopt = mlplanranking[0]+1;
+		
 			double[] difference1 = new double[size];
 			double[] difference2 = new double[size];
 			double[] difference4 = new double[size];
@@ -324,17 +342,6 @@ public class modifiedISACEvaluator {
 			System.out.println("Mein Platz 3: "+difference2[size-1]);
 			System.out.print("Der Verlust gegen meinen Platz 3: ");
 			System.out.println((Math.rint((1000.0 *(difference1[0]-difference2[size-1]))))/1000.0);
-//				difference1.add(perfotruth);
-//				difference2.add(perfomy);
-//			}
-//			double maxPerfo = Double.MIN_VALUE;
-//			for(int h = 0; h<difference2.size();h++) {
-//				if(difference2.get(h)>= maxPerfo) {
-//					maxPerfo = difference2.get(h);
-//				}
-//			}
-//			System.out.println("Der Verlust "+(difference1.get(0)-maxPerfo));
-			//System.out.println(positionInRanking.toString());
 			untochedmy[i]= difference2[0];
 			untocedoverall[i] = difference3[0];
 			untouchedml[i] = difference4[0];
@@ -360,13 +367,15 @@ public class modifiedISACEvaluator {
 			
 			System.out.println("Ist die beste Performance Plazt 1 bei meinem ranking? "+(platz1 == difference2[size-1]));
 			
-			System.out.println(Arrays.toString(rankingtruth));
-			System.out.println(Arrays.toString(myranking));
+//			System.out.println(Arrays.toString(rankingtruth));
+//			System.out.println(Arrays.toString(myranking));
 			
 			System.out.println(" ");
 			KendallsCorrelation correl = new KendallsCorrelation();
-			//results[i] = correl.correlation(rankingTruth, rankingFromMyMethod);
+			KendallsCorrelation correlML = new KendallsCorrelation();
 			results[i] = correl.correlation(rankingTruth, rankingFromMyMethod);
+//			results[i] = correl.correlation(rankingTruth, finishedoverallranking);
+			kendallforML[i] = correlML.correlation(rankingTruth, mlplanranking);
 			
 			
 			Arrays.sort(difference3);
@@ -374,6 +383,13 @@ public class modifiedISACEvaluator {
 			top3ml[i] = difference1[0]- difference4[difference4.length-1];
 			top3mymethod[i] = difference1[0]-difference2[difference2.length-1];
 			top3overall[i] = difference1[0]-difference3[difference3.length-1];
+			double place = 0;
+			for(String str : positionInRanking.keySet()) {
+				if(str.equals("weka.classifiers.trees.RandomForest")) {
+					place =positionInRanking.get(str); 
+				}
+			}	
+			randomForest[i] = place;
 			
 			//System.out.println("Durchlauf nummer "+i);		
 		}
